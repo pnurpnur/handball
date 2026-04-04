@@ -33,7 +33,8 @@ export default function ClientApp({ initialMatches, initialStats, teams }: Props
 
   const totalMatches = filteredMatches.length;
   const playedCount = filteredMatches.filter((m) => m.isPlayed).length;
-  const emreCount = filteredMatches.filter((m) => m.emreInSquad).length;
+  const emrePlayedCount = filteredMatches.filter((m) => m.isPlayed && m.emreInSquad).length;
+  const emrePct = playedCount > 0 ? Math.round((emrePlayedCount / playedCount) * 100) : 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -46,7 +47,6 @@ export default function ClientApp({ initialMatches, initialStats, teams }: Props
               <h1 className="text-lg font-bold leading-tight">
                 Emre Askim Pettersen
               </h1>
-              <p className="text-sky-200 text-xs">Håndball · Heimdal</p>
             </div>
           </div>
         </div>
@@ -117,7 +117,7 @@ export default function ClientApp({ initialMatches, initialStats, teams }: Props
                 {playedCount} spilt
               </span>
               <span className="text-xs bg-sky-50 border border-sky-200 px-3 py-1 rounded-full text-sky-700">
-                Emre med i {emreCount}
+                Emre med i {emrePlayedCount} av {playedCount} spilte ({emrePct}%)
               </span>
             </div>
 

@@ -47,6 +47,9 @@ function TeamStatsBlock({
     gray: "bg-gray-500",
   };
 
+  const winPct =
+    stats.played > 0 ? Math.round((stats.won / stats.played) * 100) : 0;
+
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
       <div className={`${colors[color]} px-4 py-2`}>
@@ -66,6 +69,7 @@ function TeamStatsBlock({
           ))}
         </div>
         <StatRow label="Kamper" value={stats.played} />
+        <StatRow label="Seiersprosent" value={`${winPct}%`} highlight />
         <StatRow
           label="Mål"
           value={`${stats.goalsFor}–${stats.goalsAgainst}`}
@@ -74,7 +78,6 @@ function TeamStatsBlock({
           label="Målforskjell"
           value={stats.goalDiff >= 0 ? `+${stats.goalDiff}` : stats.goalDiff}
           sub={`snitt ${stats.avgGoalDiff >= 0 ? "+" : ""}${stats.avgGoalDiff}`}
-          highlight
         />
       </div>
     </div>

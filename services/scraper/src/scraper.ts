@@ -120,11 +120,12 @@ async function scrapeTeamPage(teamId: number): Promise<{
     const matches: MatchRow[] = [];
 
     $("table.print-only").each((_ti, table) => {
-      // Tournament heading above this table
+      // Tournament name is inside the same .table-outer container as a <b class="row">
+      // e.g. <b class="row">Turnering: Gutter 20 år, NTE MidtNorge-serien - 02</b>
       let tableTournament = defaultTournament;
-      const prevEl = $(table).prev();
-      if (prevEl.length && prevEl.text().trim()) {
-        tableTournament = prevEl.text().trim() || defaultTournament;
+      const bRow = $(table).closest(".table-outer").find("b.row").first();
+      if (bRow.length) {
+        tableTournament = bRow.text().trim().replace(/^Turnering:\s*/i, "");
       }
 
       // Skip header row (index 0)

@@ -1,9 +1,88 @@
 "use client";
 
-import type { StatsResponse, TeamStats } from "@/lib/types";
+import type { MatchData, StatsResponse, TeamStats } from "@/lib/types";
 
 interface Props {
   stats: StatsResponse;
+  matches: MatchData[];
+}
+
+interface MatchSummary {
+  id: string;
+  date: string;
+  teamGoals: number;
+  oppGoals: number;
+  opponent: string;
+  teamLabel?: string; // shown in combined view
+}
+
+interface Breakdown {
+  won: MatchSummary[];
+  draw: MatchSummary[];
+  lost: MatchSummary[];
+}
+
+/** Classify matches into won/draw/lost from the tracked team's perspective. */
+function classifyMatches(
+  matches: MatchData[],
+  teamName: string | null // null = use each match's own teamName
+): Breakdown {
+  const won: MatchSummary[] = [], draw: MatchSummary[] = [], lost: MatchSummary[] = [];
+
+  for (const m of matches) {
+    if (!m.isPlayed || m.homeScore === null || m.awayScore === null) continue;
+    const name = teamName ?? m.teamName;
+    const firstWord = name.toLowerCase().split(" ")[0];
+    const isHome = m.homeTeam.toLowerCase().includes(firstWord);
+    const tf = isHome ? m.homeScore : m.awayScore;
+    const ta = isHome ? m.awayScore : m.homeScore;
+    const opponent = isHome ? m.awayTeam : m.homeTeam;
+    const date = m.date
+      ? new Date(m.date).toLocaleDateString("no-NO", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        })
+      : "";
+    const summary: MatchSummary = {
+      id: m.id,
+      date,
+      teamGoals: tf,
+      oppGoals: ta,
+      opponent,
+      teamLabel: teamName === null ? m.teamName : undefined,
+    };
+    if (tf > ta) won.push(summary);
+    else if (tf === ta) draw.push(summary);
+    else lost.push(summary);
+  }
+
+  return { won, draw, lost };
+}
+
+function MatchTooltip({ matches }: { matches: MatchSummary[] }) {
+  if (matches.length === 0) return null;
+  return (
+    <div className="absolute z-50 bottom-full mb-2 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-xl whitespace-nowrap pointer-events-none">
+      <div className="space-y-1">
+        {matches.map((m) => (
+          <div key={m.id}>
+            <span className="font-semibold">
+              {m.teamGoals}–{m.oppGoals}
+            </span>
+            {" mot "}
+            <span>{m.opponent}</span>
+            {m.teamLabel && (
+              <span className="opacity-60"> · {m.teamLabel}</span>
+            )}
+            <span className="opacity-60"> · {m.date}</span>
+          </div>
+        ))}
+      </div>
+      {/* Arrow */}
+      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+    </div>
+  );
 }
 
 function StatRow({
@@ -36,10 +115,12 @@ function TeamStatsBlock({
   stats,
   label,
   color,
+  breakdown,
 }: {
   stats: TeamStats;
   label: string;
   color: "blue" | "green" | "gray";
+  breakdown: Breakdown;
 }) {
   const colors = {
     blue: "bg-sky-600",
@@ -50,21 +131,26 @@ function TeamStatsBlock({
   const winPct =
     stats.played > 0 ? Math.round((stats.won / stats.played) * 100) : 0;
 
+  const wdl = [
+    { label: "Vunnet", value: stats.won, color: "text-green-700 bg-green-50", matches: breakdown.won },
+    { label: "Uavgjort", value: stats.draw, color: "text-yellow-700 bg-yellow-50", matches: breakdown.draw },
+    { label: "Tapt", value: stats.lost, color: "text-red-700 bg-red-50", matches: breakdown.lost },
+  ];
+
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className={`${colors[color]} px-4 py-2`}>
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
+      <div className={`${colors[color]} px-4 py-2 rounded-t-xl`}>
         <p className="text-white text-sm font-semibold">{label}</p>
       </div>
       <div className="p-3 space-y-0.5">
         <div className="grid grid-cols-3 gap-2 mb-3">
-          {[
-            { label: "Vunnet", value: stats.won, color: "text-green-700 bg-green-50" },
-            { label: "Uavgjort", value: stats.draw, color: "text-yellow-700 bg-yellow-50" },
-            { label: "Tapt", value: stats.lost, color: "text-red-700 bg-red-50" },
-          ].map(({ label, value, color }) => (
-            <div key={label} className={`rounded-lg p-2 text-center ${color}`}>
-              <p className="text-xl font-bold">{value}</p>
-              <p className="text-xs">{label}</p>
+          {wdl.map(({ label, value, color, matches }) => (
+            <div key={label} className="relative group">
+              <div className={`rounded-lg p-2 text-center cursor-default ${color} ${matches.length > 0 ? "hover:opacity-80" : ""}`}>
+                <p className="text-xl font-bold">{value}</p>
+                <p className="text-xs">{label}</p>
+              </div>
+              {matches.length > 0 && <MatchTooltip matches={matches} />}
             </div>
           ))}
         </div>
@@ -84,7 +170,9 @@ function TeamStatsBlock({
   );
 }
 
-export default function StatsView({ stats }: Props) {
+export default function StatsView({ stats, matches }: Props) {
+  const playedMatches = matches.filter((m) => m.isPlayed);
+
   return (
     <div className="space-y-6">
       {/* Emre personal stats */}
@@ -150,11 +238,13 @@ export default function StatsView({ stats }: Props) {
             stats={stats.combined.withEmre}
             label="Med Emre"
             color="green"
+            breakdown={classifyMatches(playedMatches.filter((m) => m.emreInSquad), null)}
           />
           <TeamStatsBlock
             stats={stats.combined.withoutEmre}
             label="Uten Emre"
             color="gray"
+            breakdown={classifyMatches(playedMatches.filter((m) => !m.emreInSquad), null)}
           />
         </div>
       </section>
@@ -163,6 +253,7 @@ export default function StatsView({ stats }: Props) {
       {stats.teams.map((team) => {
         const teamStats = stats.perTeam[team.id];
         if (!teamStats) return null;
+        const teamMatches = playedMatches.filter((m) => m.teamId === team.id);
 
         return (
           <section key={team.id}>
@@ -174,16 +265,19 @@ export default function StatsView({ stats }: Props) {
                 stats={teamStats.overall}
                 label="Totalt"
                 color="blue"
+                breakdown={classifyMatches(teamMatches, teamStats.teamName)}
               />
               <TeamStatsBlock
                 stats={teamStats.withEmre}
                 label="Med Emre"
                 color="green"
+                breakdown={classifyMatches(teamMatches.filter((m) => m.emreInSquad), teamStats.teamName)}
               />
               <TeamStatsBlock
                 stats={teamStats.withoutEmre}
                 label="Uten Emre"
                 color="gray"
+                breakdown={classifyMatches(teamMatches.filter((m) => !m.emreInSquad), teamStats.teamName)}
               />
             </div>
           </section>

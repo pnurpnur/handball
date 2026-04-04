@@ -151,7 +151,7 @@ export default function ClientApp({ initialMatches, initialStats, teams }: Props
             </div>
           </div>
         ) : (
-          <StatsView stats={initialStats} />
+          <StatsView stats={initialStats} matches={initialMatches} />
         )}
       </main>
 

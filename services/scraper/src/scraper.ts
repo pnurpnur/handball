@@ -350,14 +350,8 @@ export async function scrapeTeam(teamId: number): Promise<number> {
           include: { emreStats: true },
         });
 
-        // Skip recently-scraped played matches (within 6 hours)
-        if (
-          existing?.isPlayed &&
-          existing.scrapedAt &&
-          Date.now() - existing.scrapedAt.getTime() < 1000 * 60 * 60 * 6
-        ) {
-          continue;
-        }
+        // Always re-scrape played matches to ensure stats are correct.
+        // Unplayed matches are always checked in case they've been played.
 
         const parsedDate = match.date ? parseNorDate(match.date) : null;
 

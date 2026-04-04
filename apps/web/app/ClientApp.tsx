@@ -15,7 +15,7 @@ interface Props {
 
 type Tab = "kamper" | "statistikk";
 type ViewMode = "table" | "cards";
-type SortKey = "date_asc" | "date_desc" | "goals_desc" | "goals_asc" | "margin_desc" | "margin_asc";
+type SortKey = "date_asc" | "date_desc" | "goals_desc" | "margin_desc" | "margin_asc";
 
 function getMargin(m: MatchData): number | null {
   if (!m.isPlayed || m.homeScore === null || m.awayScore === null) return null;
@@ -28,7 +28,7 @@ export default function ClientApp({ initialMatches, initialStats, teams }: Props
   const [tab, setTab] = useState<Tab>("kamper");
   const [teamFilter, setTeamFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [sortKey, setSortKey] = useState<SortKey>("date_asc");
+  const [sortKey, setSortKey] = useState<SortKey>("date_desc");
   const [viewMode, setViewMode] = useState<ViewMode>("table");
 
   const filteredMatches = useMemo(() => {
@@ -44,7 +44,6 @@ export default function ClientApp({ initialMatches, initialStats, teams }: Props
         case "date_asc":  return (a.date ?? "").localeCompare(b.date ?? "");
         case "date_desc": return (b.date ?? "").localeCompare(a.date ?? "");
         case "goals_desc": return (b.emreStats?.goals ?? -1) - (a.emreStats?.goals ?? -1);
-        case "goals_asc":  return (a.emreStats?.goals ?? -1) - (b.emreStats?.goals ?? -1);
         case "margin_desc": {
           const ma = getMargin(a) ?? -Infinity;
           const mb = getMargin(b) ?? -Infinity;

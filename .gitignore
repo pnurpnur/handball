@@ -5,5 +5,4 @@ dist/
 .env.local
 *.env.local
 .DS_Store
-prisma/migrations/
 .claude/

@@ -94,11 +94,6 @@ async function main() {
     process.exit(0);
   }
 
-  // Run immediately on startup, then schedule based on match times
-  console.log("[Scraper] Initial scrape on startup...");
-  await scrapeAll().catch(console.error);
-  await scheduleMatchScrapes().catch(console.error);
-
   // Daily 08:00: catch any overnight results + reschedule for new matches
   const morningJob = new CronJob(
     "0 8 * * *",
@@ -112,7 +107,7 @@ async function main() {
     "Europe/Oslo"
   );
 
-  // Express server to receive webhook from Next.js /api/scrape
+  // Start HTTP server first so Railway healthcheck passes immediately
   const http = await import("http");
   const port = process.env.PORT || 3001;
 
@@ -165,6 +160,12 @@ async function main() {
   server.listen(port, () => {
     console.log(`[Scraper] HTTP server listening on port ${port}`);
     console.log(`[Scraper] Dynamic post-match scheduling active`);
+
+    // Run initial scrape in background after server is ready
+    console.log("[Scraper] Initial scrape on startup (background)...");
+    scrapeAll()
+      .then(() => scheduleMatchScrapes())
+      .catch(console.error);
   });
 
   process.on("SIGTERM", async () => {

@@ -6,16 +6,20 @@ interface Props {
   teams: TeamData[];
   selectedTeam: string;
   selectedStatus: string;
+  sortKey: string;
   onTeamChange: (v: string) => void;
   onStatusChange: (v: string) => void;
+  onSortChange: (v: string) => void;
 }
 
 export default function MatchFilters({
   teams,
   selectedTeam,
   selectedStatus,
+  sortKey,
   onTeamChange,
   onStatusChange,
+  onSortChange,
 }: Props) {
   return (
     <div className="flex flex-wrap gap-2">
@@ -31,6 +35,20 @@ export default function MatchFilters({
             {t.name}
           </option>
         ))}
+      </select>
+
+      {/* Sort */}
+      <select
+        value={sortKey}
+        onChange={(e) => onSortChange(e.target.value)}
+        className="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+      >
+        <option value="date_asc">Dato ↑</option>
+        <option value="date_desc">Dato ↓</option>
+        <option value="goals_desc">Emre mål ↓</option>
+        <option value="goals_asc">Emre mål ↑</option>
+        <option value="margin_desc">Seiersmargin ↓</option>
+        <option value="margin_asc">Seiersmargin ↑</option>
       </select>
 
       {/* Status filter */}

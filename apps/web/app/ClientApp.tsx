@@ -15,21 +15,49 @@ interface Props {
 
 type Tab = "kamper" | "statistikk";
 type ViewMode = "table" | "cards";
+type SortKey = "date_asc" | "date_desc" | "goals_desc" | "goals_asc" | "margin_desc" | "margin_asc";
+
+function getMargin(m: MatchData): number | null {
+  if (!m.isPlayed || m.homeScore === null || m.awayScore === null) return null;
+  const firstWord = m.teamName.toLowerCase().split(" ")[0];
+  const isHome = m.homeTeam.toLowerCase().includes(firstWord);
+  return isHome ? m.homeScore - m.awayScore! : m.awayScore! - m.homeScore;
+}
 
 export default function ClientApp({ initialMatches, initialStats, teams }: Props) {
   const [tab, setTab] = useState<Tab>("kamper");
   const [teamFilter, setTeamFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [sortKey, setSortKey] = useState<SortKey>("date_asc");
   const [viewMode, setViewMode] = useState<ViewMode>("table");
 
   const filteredMatches = useMemo(() => {
-    return initialMatches.filter((m) => {
+    const filtered = initialMatches.filter((m) => {
       if (teamFilter !== "all" && String(m.teamId) !== teamFilter) return false;
       if (statusFilter === "played" && !m.isPlayed) return false;
       if (statusFilter === "upcoming" && m.isPlayed) return false;
       return true;
     });
-  }, [initialMatches, teamFilter, statusFilter]);
+
+    return [...filtered].sort((a, b) => {
+      switch (sortKey) {
+        case "date_asc":  return (a.date ?? "").localeCompare(b.date ?? "");
+        case "date_desc": return (b.date ?? "").localeCompare(a.date ?? "");
+        case "goals_desc": return (b.emreStats?.goals ?? -1) - (a.emreStats?.goals ?? -1);
+        case "goals_asc":  return (a.emreStats?.goals ?? -1) - (b.emreStats?.goals ?? -1);
+        case "margin_desc": {
+          const ma = getMargin(a) ?? -Infinity;
+          const mb = getMargin(b) ?? -Infinity;
+          return mb - ma;
+        }
+        case "margin_asc": {
+          const ma = getMargin(a) ?? Infinity;
+          const mb = getMargin(b) ?? Infinity;
+          return ma - mb;
+        }
+      }
+    });
+  }, [initialMatches, teamFilter, statusFilter, sortKey]);
 
   const totalMatches = filteredMatches.length;
   const playedCount = filteredMatches.filter((m) => m.isPlayed).length;
@@ -79,8 +107,10 @@ export default function ClientApp({ initialMatches, initialStats, teams }: Props
                 teams={teams}
                 selectedTeam={teamFilter}
                 selectedStatus={statusFilter}
+                sortKey={sortKey}
                 onTeamChange={setTeamFilter}
                 onStatusChange={setStatusFilter}
+                onSortChange={(v) => setSortKey(v as SortKey)}
               />
 
               {/* View mode toggle (hidden on mobile – always cards) */}

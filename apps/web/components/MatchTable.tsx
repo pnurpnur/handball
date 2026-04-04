@@ -114,12 +114,21 @@ export default function MatchTable({ matches }: Props) {
                 <span className="truncate block">{match.tournament}</span>
               </td>
               <td className="px-3 py-2.5 max-w-[180px]">
-                <span className="text-xs font-medium block truncate">
-                  {match.homeTeam}
-                </span>
-                <span className="text-xs text-gray-500 block truncate">
-                  {match.awayTeam}
-                </span>
+                <div className="flex items-center gap-1">
+                  <div className="min-w-0">
+                    <span className="text-xs font-medium block truncate">{match.homeTeam}</span>
+                    <span className="text-xs text-gray-500 block truncate">{match.awayTeam}</span>
+                  </div>
+                  <a
+                    href={`https://www.handball.no/system/kamper/kamp/?matchid=${match.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="shrink-0 text-gray-300 hover:text-sky-500 transition-colors"
+                    title="Åpne på handball.no"
+                  >
+                    ↗
+                  </a>
+                </div>
               </td>
               <td className="px-3 py-2.5 text-center">
                 <Result match={match} />

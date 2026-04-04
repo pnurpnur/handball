@@ -98,39 +98,41 @@ export default function StatsView({ stats }: Props) {
               {
                 label: "Kamper",
                 total: stats.emre.matchesPlayed,
-                avg: null,
+                sub: stats.combined.overall.played > 0
+                  ? `${Math.round((stats.emre.matchesPlayed / stats.combined.overall.played) * 100)}% deltakelse`
+                  : null,
                 color: "bg-sky-50 text-sky-700",
               },
               {
                 label: "Mål",
                 total: stats.emre.totalGoals,
-                avg: stats.emre.avgGoals,
+                sub: `${stats.emre.avgGoals} snitt`,
                 color: "bg-emerald-50 text-emerald-700",
               },
               {
                 label: "7M",
                 total: stats.emre.totalSevenMeter,
-                avg: stats.emre.avgSevenMeter,
+                sub: `${stats.emre.avgSevenMeter} snitt`,
                 color: "bg-blue-50 text-blue-700",
               },
               {
                 label: "Gule",
                 total: stats.emre.totalYellowCards,
-                avg: stats.emre.avgYellowCards,
+                sub: `${stats.emre.avgYellowCards} snitt`,
                 color: "bg-yellow-50 text-yellow-700",
               },
               {
                 label: "2 min",
                 total: stats.emre.totalTwoMinutes,
-                avg: stats.emre.avgTwoMinutes,
+                sub: `${stats.emre.avgTwoMinutes} snitt`,
                 color: "bg-orange-50 text-orange-700",
               },
-            ].map(({ label, total, avg, color }) => (
+            ].map(({ label, total, sub, color }) => (
               <div key={label} className={`rounded-xl p-3 text-center ${color}`}>
                 <p className="text-2xl font-bold">{total}</p>
                 <p className="text-xs font-medium">{label}</p>
-                {avg !== null && (
-                  <p className="text-xs opacity-70 mt-0.5">{avg} snitt</p>
+                {sub !== null && (
+                  <p className="text-xs opacity-70 mt-0.5">{sub}</p>
                 )}
               </div>
             ))}

@@ -63,24 +63,33 @@ function classifyMatches(
 function MatchTooltip({ matches }: { matches: MatchSummary[] }) {
   if (matches.length === 0) return null;
   return (
-    <div className="hidden group-hover:block absolute z-50 bottom-full mb-2 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-xl whitespace-nowrap pointer-events-none">
-      <div className="space-y-1">
-        {matches.map((m) => (
-          <div key={m.id}>
-            <span className="font-semibold">
-              {m.teamGoals}–{m.oppGoals}
-            </span>
-            {" mot "}
-            <span>{m.opponent}</span>
-            {m.teamLabel && (
-              <span className="opacity-60"> · {m.teamLabel}</span>
-            )}
-            <span className="opacity-60"> · {m.date}</span>
-          </div>
-        ))}
+    // pb-2 bridges the gap between the box and tooltip so hover stays active
+    <div className="hidden group-hover:block absolute z-50 bottom-full pb-2 left-1/2 -translate-x-1/2">
+      <div className="bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-xl whitespace-nowrap">
+        <div className="space-y-1">
+          {matches.map((m) => (
+            <a
+              key={m.id}
+              href={`https://www.handball.no/system/kamper/kamp/?matchid=${m.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 hover:text-sky-300 transition-colors"
+            >
+              <span className="font-semibold">
+                {m.teamGoals}–{m.oppGoals}
+              </span>
+              <span>mot {m.opponent}</span>
+              {m.teamLabel && (
+                <span className="opacity-60">· {m.teamLabel}</span>
+              )}
+              <span className="opacity-60">· {m.date}</span>
+              <span className="opacity-40">↗</span>
+            </a>
+          ))}
+        </div>
+        {/* Arrow */}
+        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
       </div>
-      {/* Arrow */}
-      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
     </div>
   );
 }

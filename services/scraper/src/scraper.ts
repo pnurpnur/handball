@@ -592,9 +592,7 @@ export async function scrapeTeam(teamId: number): Promise<number> {
           });
         } else if (!details.emreInSquad) {
           // Remove stats if Emre is no longer in the squad
-          await prisma.emreStats
-            .delete({ where: { matchId } })
-            .catch(() => {}); // Ignore if not exists
+          await prisma.emreStats.deleteMany({ where: { matchId } });
         }
 
         matchesUpdated++;

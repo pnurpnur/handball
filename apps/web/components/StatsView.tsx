@@ -63,7 +63,7 @@ function classifyMatches(
 function MatchTooltip({ matches }: { matches: MatchSummary[] }) {
   if (matches.length === 0) return null;
   return (
-    <div className="absolute z-50 bottom-full mb-2 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-xl whitespace-nowrap pointer-events-none">
+    <div className="hidden group-hover:block absolute z-50 bottom-full mb-2 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-xl whitespace-nowrap pointer-events-none">
       <div className="space-y-1">
         {matches.map((m) => (
           <div key={m.id}>

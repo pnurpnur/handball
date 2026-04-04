@@ -59,7 +59,12 @@ export default function MatchCard({ match }: Props) {
   const hnUrl = `https://www.handball.no/system/kamper/kamp/?matchid=${match.id}`;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 space-y-3">
+    <a
+      href={hnUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block bg-white rounded-xl shadow-sm border border-gray-100 p-4 space-y-3 hover:border-sky-200 hover:shadow-md transition-all"
+    >
       {/* Header: date + team + tournament */}
       <div className="flex items-start justify-between gap-2">
         <div>
@@ -69,20 +74,9 @@ export default function MatchCard({ match }: Props) {
           </p>
           <p className="text-xs text-sky-600 font-medium mt-0.5">{match.tournament}</p>
         </div>
-        <div className="flex items-center gap-1.5 shrink-0">
-          <span className="text-xs bg-sky-50 text-sky-700 border border-sky-200 px-2 py-0.5 rounded-full whitespace-nowrap">
-            {match.teamName}
-          </span>
-          <a
-            href={hnUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-300 hover:text-sky-500 transition-colors text-sm"
-            title="Åpne på handball.no"
-          >
-            ↗
-          </a>
-        </div>
+        <span className="text-xs bg-sky-50 text-sky-700 border border-sky-200 px-2 py-0.5 rounded-full whitespace-nowrap shrink-0">
+          {match.teamName}
+        </span>
       </div>
 
       {/* Match */}
@@ -151,6 +145,6 @@ export default function MatchCard({ match }: Props) {
           )}
         </div>
       )}
-    </div>
+    </a>
   );
 }

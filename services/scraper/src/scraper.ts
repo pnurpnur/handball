@@ -417,7 +417,9 @@ export async function scrapeTeam(teamId: number): Promise<number> {
             });
           }
         } else {
-          // Unplayed match – store basic data from team page, no match page fetch
+          // Unplayed match – fetch match page for accurate tournament name and venue
+          const details = await scrapeMatchDetails(match.matchId);
+
           await prisma.match.upsert({
             where: { id: match.matchId },
             update: {
@@ -428,8 +430,9 @@ export async function scrapeTeam(teamId: number): Promise<number> {
               awayScore: null,
               isPlayed: false,
               date: parsedDate ?? existing?.date,
-              venue: match.venue || existing?.venue,
-              tournament: match.tournament || existing?.tournament || "",
+              venue: match.venue || details?.venue || existing?.venue,
+              tournament:
+                details?.tournament || match.tournament || existing?.tournament || "",
               scrapedAt: new Date(),
             },
             create: {
@@ -441,8 +444,8 @@ export async function scrapeTeam(teamId: number): Promise<number> {
               awayScore: null,
               isPlayed: false,
               date: parsedDate,
-              venue: match.venue,
-              tournament: match.tournament || "",
+              venue: match.venue || details?.venue,
+              tournament: details?.tournament || match.tournament || "",
               scrapedAt: new Date(),
             },
           });

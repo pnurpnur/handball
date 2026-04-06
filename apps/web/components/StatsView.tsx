@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { MatchData, StatsResponse, TeamStats } from "@/lib/types";
 
 interface Props {
@@ -120,6 +121,34 @@ function StatRow({
   );
 }
 
+function WithoutEmreToggle({
+  isExpanded,
+  onToggle,
+  children,
+}: {
+  isExpanded: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  if (!isExpanded) {
+    return (
+      <button
+        onClick={onToggle}
+        className="bg-gray-500 hover:bg-gray-600 transition-colors rounded-xl text-white text-xs font-semibold py-2 px-1.5 self-stretch flex items-center justify-center"
+        title="Vis uten Emre"
+        style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+      >
+        Uten Emre
+      </button>
+    );
+  }
+  return (
+    <div className="flex-1 cursor-pointer" onClick={onToggle}>
+      {children}
+    </div>
+  );
+}
+
 function TeamStatsBlock({
   stats,
   label,
@@ -181,6 +210,18 @@ function TeamStatsBlock({
 
 export default function StatsView({ stats, matches }: Props) {
   const playedMatches = matches.filter((m) => m.isPlayed);
+  const [expandedTeams, setExpandedTeams] = useState<Set<number>>(new Set());
+  const [expandedCombined, setExpandedCombined] = useState(false);
+
+  const toggleTeam = (teamId: number) => {
+    const newSet = new Set(expandedTeams);
+    if (newSet.has(teamId)) {
+      newSet.delete(teamId);
+    } else {
+      newSet.add(teamId);
+    }
+    setExpandedTeams(newSet);
+  };
 
   return (
     <div className="space-y-6">
@@ -240,21 +281,33 @@ export default function StatsView({ stats, matches }: Props) {
       {/* Combined comparison: with vs without Emre */}
       <section>
         <h2 className="text-base font-bold text-gray-800 mb-3">
-          📊 Med vs. uten Emre – alle lag
+          📊 Alle lag
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <TeamStatsBlock
-            stats={stats.combined.withEmre}
-            label="Med Emre"
-            color="green"
-            breakdown={classifyMatches(playedMatches.filter((m) => m.emreInSquad), null)}
-          />
-          <TeamStatsBlock
-            stats={stats.combined.withoutEmre}
-            label="Uten Emre"
-            color="gray"
-            breakdown={classifyMatches(playedMatches.filter((m) => !m.emreInSquad), null)}
-          />
+        <div className="flex gap-3 items-stretch">
+          <div className="flex-1">
+            <TeamStatsBlock
+              stats={stats.combined.overall}
+              label="Totalt"
+              color="blue"
+              breakdown={classifyMatches(playedMatches, null)}
+            />
+          </div>
+          <div className="flex-1">
+            <TeamStatsBlock
+              stats={stats.combined.withEmre}
+              label="Med Emre"
+              color="green"
+              breakdown={classifyMatches(playedMatches.filter((m) => m.emreInSquad), null)}
+            />
+          </div>
+          <WithoutEmreToggle isExpanded={expandedCombined} onToggle={() => setExpandedCombined(!expandedCombined)}>
+            <TeamStatsBlock
+              stats={stats.combined.withoutEmre}
+              label="Uten Emre"
+              color="gray"
+              breakdown={classifyMatches(playedMatches.filter((m) => !m.emreInSquad), null)}
+            />
+          </WithoutEmreToggle>
         </div>
       </section>
 
@@ -263,31 +316,38 @@ export default function StatsView({ stats, matches }: Props) {
         const teamStats = stats.perTeam[team.id];
         if (!teamStats) return null;
         const teamMatches = playedMatches.filter((m) => m.teamId === team.id);
+        const isExpanded = expandedTeams.has(team.id);
 
         return (
           <section key={team.id}>
             <h2 className="text-base font-bold text-gray-800 mb-3">
               🤾 {team.name}
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <TeamStatsBlock
-                stats={teamStats.overall}
-                label="Totalt"
-                color="blue"
-                breakdown={classifyMatches(teamMatches, teamStats.teamName)}
-              />
-              <TeamStatsBlock
-                stats={teamStats.withEmre}
-                label="Med Emre"
-                color="green"
-                breakdown={classifyMatches(teamMatches.filter((m) => m.emreInSquad), teamStats.teamName)}
-              />
-              <TeamStatsBlock
-                stats={teamStats.withoutEmre}
-                label="Uten Emre"
-                color="gray"
-                breakdown={classifyMatches(teamMatches.filter((m) => !m.emreInSquad), teamStats.teamName)}
-              />
+            <div className="flex gap-3 items-stretch">
+              <div className="flex-1">
+                <TeamStatsBlock
+                  stats={teamStats.overall}
+                  label="Totalt"
+                  color="blue"
+                  breakdown={classifyMatches(teamMatches, teamStats.teamName)}
+                />
+              </div>
+              <div className="flex-1">
+                <TeamStatsBlock
+                  stats={teamStats.withEmre}
+                  label="Med Emre"
+                  color="green"
+                  breakdown={classifyMatches(teamMatches.filter((m) => m.emreInSquad), teamStats.teamName)}
+                />
+              </div>
+              <WithoutEmreToggle isExpanded={isExpanded} onToggle={() => toggleTeam(team.id)}>
+                <TeamStatsBlock
+                  stats={teamStats.withoutEmre}
+                  label="Uten Emre"
+                  color="gray"
+                  breakdown={classifyMatches(teamMatches.filter((m) => !m.emreInSquad), teamStats.teamName)}
+                />
+              </WithoutEmreToggle>
             </div>
           </section>
         );

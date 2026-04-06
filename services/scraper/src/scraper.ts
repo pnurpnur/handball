@@ -1,6 +1,6 @@
 import { chromium, Browser } from "playwright";
 import * as cheerio from "cheerio";
-import { TEAM_IDS, EMRE_NAME, TEAM_PAGE, MATCH_PAGE } from "./config";
+import { TEAM_IDS, CURRENT_SEASON_ID, EMRE_NAME, TEAM_PAGE, MATCH_PAGE } from "./config";
 import { prisma } from "./db";
 
 interface MatchRow {
@@ -364,6 +364,7 @@ export async function scrapeTeam(teamId: number): Promise<number> {
             where: { id: match.matchId },
             update: {
               teamId,
+              seasonId: CURRENT_SEASON_ID,
               homeTeam: match.homeTeam,
               awayTeam: match.awayTeam,
               homeScore: match.homeScore,   // from team page H-B column (reliable)
@@ -379,6 +380,7 @@ export async function scrapeTeam(teamId: number): Promise<number> {
             create: {
               id: match.matchId,
               teamId,
+              seasonId: CURRENT_SEASON_ID,
               homeTeam: match.homeTeam,
               awayTeam: match.awayTeam,
               homeScore: match.homeScore,
@@ -424,6 +426,7 @@ export async function scrapeTeam(teamId: number): Promise<number> {
             where: { id: match.matchId },
             update: {
               teamId,
+              seasonId: CURRENT_SEASON_ID,
               homeTeam: match.homeTeam,
               awayTeam: match.awayTeam,
               homeScore: null,
@@ -438,6 +441,7 @@ export async function scrapeTeam(teamId: number): Promise<number> {
             create: {
               id: match.matchId,
               teamId,
+              seasonId: CURRENT_SEASON_ID,
               homeTeam: match.homeTeam,
               awayTeam: match.awayTeam,
               homeScore: null,

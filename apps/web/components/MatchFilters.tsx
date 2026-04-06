@@ -56,6 +56,8 @@ export default function MatchFilters({
           { value: "all", label: "Alle" },
           { value: "played", label: "Spilt" },
           { value: "upcoming", label: "Ikke spilt" },
+          { value: "participated", label: "Deltatt" },
+          { value: "not-participated", label: "Ikke deltatt" },
         ].map(({ value, label }) => (
           <button
             key={value}

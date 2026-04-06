@@ -1,4 +1,5 @@
-export const TEAM_IDS = [928241, 771912, 709787, 682520, 698373];
+export const CURRENT_SEASON_ID = 1; // Update when a new season starts
+export const TEAM_IDS = [928241, 771912, 709787, 682520, 698373]; // Update each season (Emre's teams)
 
 export const EMRE_NAME = "Emre Askim Pettersen";
 

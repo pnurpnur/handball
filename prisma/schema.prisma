@@ -7,6 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Season {
+  id        Int      @id @default(autoincrement())
+  name      String
+  matches   Match[]
+  createdAt DateTime @default(now())
+}
+
 model Team {
   id          Int       @id // handball.no lag-ID
   name        String
@@ -22,6 +29,8 @@ model Match {
   id              String    @id // handball.no matchid
   teamId          Int
   team            Team      @relation(fields: [teamId], references: [id])
+  seasonId        Int?
+  season          Season?   @relation(fields: [seasonId], references: [id])
 
   tournament      String
   date            DateTime?
@@ -41,6 +50,7 @@ model Match {
 
   @@index([teamId])
   @@index([date])
+  @@index([seasonId])
 }
 
 model EmreStats {

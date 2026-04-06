@@ -1,3 +1,8 @@
+export interface SeasonData {
+  id: number;
+  name: string;
+}
+
 export interface TeamData {
   id: number;
   name: string;
@@ -15,6 +20,7 @@ export interface MatchData {
   id: string;
   teamId: number;
   teamName: string;
+  seasonId: number | null;
   tournament: string;
   date: string | null;
   homeTeam: string;

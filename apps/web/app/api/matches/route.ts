@@ -32,6 +32,7 @@ export async function GET(req: NextRequest) {
     id: m.id,
     teamId: m.teamId,
     teamName: m.team.name,
+    seasonId: m.seasonId,
     tournament: m.tournament,
     date: m.date ? m.date.toISOString() : null,
     homeTeam: m.homeTeam,

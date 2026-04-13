@@ -54,13 +54,11 @@ export interface StatsSummary {
 
 export interface EmreOverallStats {
   matchesPlayed: number;
-  totalGoals: number;
-  totalSevenMeter: number;
+  totalGoals: number;       // goals + sevenMeter combined
   totalYellowCards: number;
   totalTwoMinutes: number;
   totalRedCards: number;
   avgGoals: number;
-  avgSevenMeter: number;
   avgYellowCards: number;
   avgTwoMinutes: number;
 }
@@ -74,12 +72,16 @@ export interface StatsResponse {
       withEmre: TeamStats;
       withoutEmre: TeamStats;
       overall: TeamStats;
+      emreGoals: number;
+      emreAvgGoals: number;
     }
   >;
   combined: {
     withEmre: TeamStats;
     withoutEmre: TeamStats;
     overall: TeamStats;
+    emreGoals: number;
+    emreAvgGoals: number;
   };
   emre: EmreOverallStats;
 }

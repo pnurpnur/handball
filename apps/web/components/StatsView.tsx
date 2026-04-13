@@ -154,11 +154,17 @@ function TeamStatsBlock({
   label,
   color,
   breakdown,
+  variant = "total",
+  emreGoals,
+  emreAvgGoals,
 }: {
   stats: TeamStats;
   label: string;
   color: "blue" | "green" | "gray";
   breakdown: Breakdown;
+  variant?: "total" | "withEmre" | "withoutEmre";
+  emreGoals?: number;
+  emreAvgGoals?: number;
 }) {
   const colors = {
     blue: "bg-sky-600",
@@ -194,15 +200,27 @@ function TeamStatsBlock({
         </div>
         <StatRow label="Kamper" value={stats.played} />
         <StatRow label="Seiersprosent" value={`${winPct}%`} highlight />
-        <StatRow
-          label="Mål"
-          value={`${stats.goalsFor}–${stats.goalsAgainst}`}
-        />
-        <StatRow
-          label="Målforskjell"
-          value={stats.goalDiff >= 0 ? `+${stats.goalDiff}` : stats.goalDiff}
-          sub={`snitt ${stats.avgGoalDiff >= 0 ? "+" : ""}${stats.avgGoalDiff}`}
-        />
+        {variant === "total" && (
+          <>
+            <StatRow
+              label="Mål"
+              value={`${stats.goalsFor}–${stats.goalsAgainst}`}
+            />
+            <StatRow
+              label="Målforskjell"
+              value={stats.goalDiff >= 0 ? `+${stats.goalDiff}` : stats.goalDiff}
+              sub={`snitt ${stats.avgGoalDiff >= 0 ? "+" : ""}${stats.avgGoalDiff}`}
+            />
+          </>
+        )}
+        {variant === "withEmre" && emreGoals !== undefined && (
+          <StatRow
+            label="Mål Emre"
+            value={emreGoals}
+            sub={`${emreAvgGoals} snitt`}
+            highlight
+          />
+        )}
       </div>
     </div>
   );
@@ -231,7 +249,7 @@ export default function StatsView({ stats, matches }: Props) {
           ⚡ Emres statistikk
         </h2>
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
             {[
               {
                 label: "Kamper",
@@ -246,12 +264,6 @@ export default function StatsView({ stats, matches }: Props) {
                 total: stats.emre.totalGoals,
                 sub: `${stats.emre.avgGoals} snitt`,
                 color: "bg-emerald-50 text-emerald-700",
-              },
-              {
-                label: "7M",
-                total: stats.emre.totalSevenMeter,
-                sub: `${stats.emre.avgSevenMeter} snitt`,
-                color: "bg-blue-50 text-blue-700",
               },
               {
                 label: "Gule",
@@ -289,6 +301,7 @@ export default function StatsView({ stats, matches }: Props) {
               stats={stats.combined.overall}
               label="Totalt"
               color="blue"
+              variant="total"
               breakdown={classifyMatches(playedMatches, null)}
             />
           </div>
@@ -297,6 +310,9 @@ export default function StatsView({ stats, matches }: Props) {
               stats={stats.combined.withEmre}
               label="Med Emre"
               color="green"
+              variant="withEmre"
+              emreGoals={stats.combined.emreGoals}
+              emreAvgGoals={stats.combined.emreAvgGoals}
               breakdown={classifyMatches(playedMatches.filter((m) => m.emreInSquad), null)}
             />
           </div>
@@ -305,6 +321,7 @@ export default function StatsView({ stats, matches }: Props) {
               stats={stats.combined.withoutEmre}
               label="Uten Emre"
               color="gray"
+              variant="withoutEmre"
               breakdown={classifyMatches(playedMatches.filter((m) => !m.emreInSquad), null)}
             />
           </WithoutEmreToggle>
@@ -329,6 +346,7 @@ export default function StatsView({ stats, matches }: Props) {
                   stats={teamStats.overall}
                   label="Totalt"
                   color="blue"
+                  variant="total"
                   breakdown={classifyMatches(teamMatches, teamStats.teamName)}
                 />
               </div>
@@ -337,6 +355,9 @@ export default function StatsView({ stats, matches }: Props) {
                   stats={teamStats.withEmre}
                   label="Med Emre"
                   color="green"
+                  variant="withEmre"
+                  emreGoals={teamStats.emreGoals}
+                  emreAvgGoals={teamStats.emreAvgGoals}
                   breakdown={classifyMatches(teamMatches.filter((m) => m.emreInSquad), teamStats.teamName)}
                 />
               </div>
@@ -345,6 +366,7 @@ export default function StatsView({ stats, matches }: Props) {
                   stats={teamStats.withoutEmre}
                   label="Uten Emre"
                   color="gray"
+                  variant="withoutEmre"
                   breakdown={classifyMatches(teamMatches.filter((m) => !m.emreInSquad), teamStats.teamName)}
                 />
               </WithoutEmreToggle>

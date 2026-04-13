@@ -58,11 +58,15 @@ function buildStats(teams: TeamData[], matches: MatchData[]): StatsResponse {
     for (const m of tm) addResult(ov, m, team.name);
     for (const m of tm.filter((m) => m.emreInSquad)) addResult(we, m, team.name);
     for (const m of tm.filter((m) => !m.emreInSquad)) addResult(wo, m, team.name);
+    const teamEmreStats = tm.filter((m) => m.emreInSquad && m.emreStats).map((m) => m.emreStats!);
+    const teamEmreGoals = teamEmreStats.reduce((s, e) => s + e.goals + e.sevenMeter, 0);
     perTeam[team.id] = {
       teamName: team.name,
       overall: toTeamStats(ov, team.id, team.name),
       withEmre: toTeamStats(we, team.id, "Med Emre"),
       withoutEmre: toTeamStats(wo, team.id, "Uten Emre"),
+      emreGoals: teamEmreGoals,
+      emreAvgGoals: teamEmreStats.length > 0 ? Math.round((teamEmreGoals / teamEmreStats.length) * 100) / 100 : 0,
     };
   }
 
@@ -80,6 +84,7 @@ function buildStats(teams: TeamData[], matches: MatchData[]): StatsResponse {
   const ep = emreStats.length;
   const avg = (n: number) => ep > 0 ? Math.round((n / ep) * 100) / 100 : 0;
   const sum = (fn: (e: typeof emreStats[0]) => number) => emreStats.reduce((s, e) => s + fn(e), 0);
+  const combinedEmreGoals = sum((e) => e.goals + e.sevenMeter);
 
   return {
     teams,
@@ -88,16 +93,16 @@ function buildStats(teams: TeamData[], matches: MatchData[]): StatsResponse {
       overall: toTeamStats(cov, 0, "Alle lag"),
       withEmre: toTeamStats(cwe, 0, "Med Emre"),
       withoutEmre: toTeamStats(cwo, 0, "Uten Emre"),
+      emreGoals: combinedEmreGoals,
+      emreAvgGoals: avg(combinedEmreGoals),
     },
     emre: {
       matchesPlayed: ep,
-      totalGoals: sum((e) => e.goals),
-      totalSevenMeter: sum((e) => e.sevenMeter),
+      totalGoals: sum((e) => e.goals + e.sevenMeter),
       totalYellowCards: sum((e) => e.yellowCards),
       totalTwoMinutes: sum((e) => e.twoMinutes),
       totalRedCards: sum((e) => e.redCards),
-      avgGoals: avg(sum((e) => e.goals)),
-      avgSevenMeter: avg(sum((e) => e.sevenMeter)),
+      avgGoals: avg(sum((e) => e.goals + e.sevenMeter)),
       avgYellowCards: avg(sum((e) => e.yellowCards)),
       avgTwoMinutes: avg(sum((e) => e.twoMinutes)),
     },

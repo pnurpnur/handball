@@ -80,7 +80,16 @@ export async function GET() {
     for (const m of teamWithEmre) calcResult(m, withEmre);
     for (const m of teamWithoutEmre) calcResult(m, withoutEmre);
 
-    perTeam[team.id] = { teamName: team.name, overall, withEmre, withoutEmre };
+    const teamEmreMatchStats = teamWithEmre.filter((m) => m.emreStats).map((m) => m.emreStats!);
+    const teamEmreGoals = teamEmreMatchStats.reduce((s, e) => s + e.goals + e.sevenMeter, 0);
+    perTeam[team.id] = {
+      teamName: team.name,
+      overall,
+      withEmre,
+      withoutEmre,
+      emreGoals: teamEmreGoals,
+      emreAvgGoals: teamEmreMatchStats.length > 0 ? Math.round((teamEmreGoals / teamEmreMatchStats.length) * 100) / 100 : 0,
+    };
   }
 
   // Combined stats
@@ -95,14 +104,14 @@ export async function GET() {
   // Emre's personal stats
   const emreStats = await prisma.emreStats.findMany();
   const emrePlayed = emreStats.length;
-  const emreTotalGoals = emreStats.reduce((s, e) => s + e.goals, 0);
-  const emreTotalSeven = emreStats.reduce((s, e) => s + e.sevenMeter, 0);
   const emreTotalYellow = emreStats.reduce((s, e) => s + e.yellowCards, 0);
   const emreTotalTwo = emreStats.reduce((s, e) => s + e.twoMinutes, 0);
   const emreTotalRed = emreStats.reduce((s, e) => s + e.redCards, 0);
 
   const avg = (n: number) =>
     emrePlayed > 0 ? Math.round((n / emrePlayed) * 100) / 100 : 0;
+
+  const combinedEmreGoals = emreStats.reduce((s, e) => s + e.goals + e.sevenMeter, 0);
 
   const response: StatsResponse = {
     teams: teams.map((t) => ({ id: t.id, name: t.name })),
@@ -111,16 +120,16 @@ export async function GET() {
       overall: combinedOverall,
       withEmre: combinedWithEmre,
       withoutEmre: combinedWithoutEmre,
+      emreGoals: combinedEmreGoals,
+      emreAvgGoals: avg(combinedEmreGoals),
     },
     emre: {
       matchesPlayed: emrePlayed,
-      totalGoals: emreTotalGoals,
-      totalSevenMeter: emreTotalSeven,
+      totalGoals: emreStats.reduce((s, e) => s + e.goals + e.sevenMeter, 0),
       totalYellowCards: emreTotalYellow,
       totalTwoMinutes: emreTotalTwo,
       totalRedCards: emreTotalRed,
-      avgGoals: avg(emreTotalGoals),
-      avgSevenMeter: avg(emreTotalSeven),
+      avgGoals: avg(emreStats.reduce((s, e) => s + e.goals + e.sevenMeter, 0)),
       avgYellowCards: avg(emreTotalYellow),
       avgTwoMinutes: avg(emreTotalTwo),
     },

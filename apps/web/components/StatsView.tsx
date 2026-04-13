@@ -104,13 +104,13 @@ function StatRow({
   label: string;
   value: string | number;
   sub?: string;
-  highlight?: boolean;
+  highlight?: "blue" | "green";
 }) {
+  const highlightClass =
+    highlight === "green" ? "bg-green-50" : highlight === "blue" ? "bg-sky-50" : "";
   return (
     <div
-      className={`flex justify-between items-center py-2 px-3 rounded-lg ${
-        highlight ? "bg-sky-50" : ""
-      }`}
+      className={`flex justify-between items-center py-2 px-3 rounded-lg ${highlightClass}`}
     >
       <span className="text-sm text-gray-600">{label}</span>
       <div className="text-right">
@@ -199,7 +199,7 @@ function TeamStatsBlock({
           ))}
         </div>
         <StatRow label="Kamper" value={stats.played} />
-        <StatRow label="Seiersprosent" value={`${winPct}%`} highlight />
+        <StatRow label="Seiersprosent" value={`${winPct}%`} highlight="blue" />
         {variant === "total" && (
           <>
             <StatRow
@@ -218,7 +218,7 @@ function TeamStatsBlock({
             label="Mål Emre"
             value={emreGoals}
             sub={`${emreAvgGoals} snitt`}
-            highlight
+            highlight="green"
           />
         )}
       </div>

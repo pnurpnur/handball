@@ -2,8 +2,10 @@ FROM mcr.microsoft.com/playwright:v1.59.1-jammy
 
 WORKDIR /app
 
-# Copy root package files
-COPY package.json ./
+# Copy root package files (lockfile pins playwright to match the browsers
+# baked into this base image; without it, npm install re-resolves a newer
+# playwright at build time and the bundled browsers won't match)
+COPY package.json package-lock.json ./
 COPY prisma/ ./prisma/
 
 # Copy scraper package files

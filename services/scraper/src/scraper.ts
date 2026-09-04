@@ -12,7 +12,7 @@ import {
   BASE_URL,
 } from "./config";
 import { prisma } from "./db";
-import { formatError } from "./util";
+import { formatError, osloLocalToUtcDate } from "./util";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -100,13 +100,13 @@ function parseNorDate(dateStr: string): Date | null {
     /(\d{2})\.(\d{2})\.(\d{2,4})(?:.*?(\d{2}):(\d{2}))?/
   );
   if (!m) return null;
-  const day = m[1];
-  const month = m[2];
+  const day = Number(m[1]);
+  const month = Number(m[2]);
   const yearRaw = m[3];
-  const year = yearRaw.length === 2 ? `20${yearRaw}` : yearRaw;
-  const hour = m[4] ?? "12";
-  const minute = m[5] ?? "00";
-  return new Date(`${year}-${month}-${day}T${hour}:${minute}:00`);
+  const year = Number(yearRaw.length === 2 ? `20${yearRaw}` : yearRaw);
+  const hour = m[4] ? Number(m[4]) : 12;
+  const minute = m[5] ? Number(m[5]) : 0;
+  return osloLocalToUtcDate(year, month, day, hour, minute);
 }
 
 /**
@@ -160,10 +160,10 @@ async function fetchTeamMatches(teamId: number): Promise<{
     if (m.homeTeamId === teamId) teamName = homeTeam;
     else if (m.awayTeamId === teamId) teamName = awayTeam;
 
-    const date = new Date(m.matchDate);
+    const [year, month, day] = m.matchDate.split("T")[0].split("-").map(Number);
     const hour = Math.floor(m.matchStartTime / 100);
     const minute = m.matchStartTime % 100;
-    date.setHours(hour, minute, 0, 0);
+    const date = osloLocalToUtcDate(year, month, day, hour, minute);
 
     const isPlayed = m.goalsHome !== null && m.goalsAway !== null;
 

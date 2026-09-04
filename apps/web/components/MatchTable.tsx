@@ -105,6 +105,7 @@ export default function MatchTable({ matches, onMinutesSaved }: Props) {
           {matches.map((match) => (
             <tr
               key={match.id}
+              data-match-id={match.id}
               className="hover:bg-sky-50/50 transition-colors cursor-pointer"
               onClick={() => window.open(`https://www.handball.no/system/kamper/kamp/?matchid=${match.id}`, "_blank", "noopener,noreferrer")}
             >

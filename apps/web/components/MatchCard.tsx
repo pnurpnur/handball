@@ -65,6 +65,7 @@ export default function MatchCard({ match, onMinutesSaved }: Props) {
       href={hnUrl}
       target="_blank"
       rel="noopener noreferrer"
+      data-match-id={match.id}
       className="block bg-white rounded-xl shadow-sm border border-gray-100 p-4 space-y-3 hover:border-sky-200 hover:shadow-md transition-all"
     >
       {/* Header: date + team + tournament */}

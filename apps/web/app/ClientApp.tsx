@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import type { MatchData, StatsResponse, TeamData, SeasonData, TeamStats } from "@/lib/types";
 import MatchCard from "@/components/MatchCard";
 import MatchTable from "@/components/MatchTable";
@@ -132,7 +132,7 @@ export default function ClientApp({ initialMatches, teams, seasons }: Props) {
   const [tab, setTab] = useState<Tab>("kamper");
   const [teamFilter, setTeamFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [sortKey, setSortKey] = useState<SortKey>("date_desc");
+  const [sortKey, setSortKey] = useState<SortKey>("date_asc");
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [selectedSeason, setSelectedSeason] = useState<number>(seasons[0]?.id ?? 1);
 
@@ -194,6 +194,29 @@ export default function ClientApp({ initialMatches, teams, seasons }: Props) {
       }
     });
   }, [seasonMatches, teamFilter, statusFilter, sortKey]);
+
+  // On first load, jump to the most recently played match instead of
+  // leaving the user at the top of the season (August). Runs once.
+  const hasAutoScrolledRef = useRef(false);
+  useEffect(() => {
+    if (hasAutoScrolledRef.current) return;
+    if (tab !== "kamper" || filteredMatches.length === 0) return;
+
+    const lastPlayed = [...filteredMatches].reverse().find((m) => m.isPlayed);
+    if (!lastPlayed) return;
+    hasAutoScrolledRef.current = true;
+
+    requestAnimationFrame(() => {
+      const candidates = document.querySelectorAll(`[data-match-id="${lastPlayed.id}"]`);
+      for (const node of Array.from(candidates)) {
+        const el = node as HTMLElement;
+        if (el.offsetParent !== null) {
+          el.scrollIntoView({ block: "center", behavior: "auto" });
+          break;
+        }
+      }
+    });
+  }, [tab, filteredMatches]);
 
   const totalMatches = filteredMatches.length;
   const playedCount = filteredMatches.filter((m) => m.isPlayed).length;

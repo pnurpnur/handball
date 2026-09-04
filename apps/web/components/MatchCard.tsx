@@ -121,38 +121,48 @@ export default function MatchCard({ match, onMinutesSaved }: Props) {
             )}
           </div>
           {match.emreStats ? (
-            <div className="grid grid-cols-5 gap-1 text-center">
-              {[
-                { label: "Mål", value: match.emreStats.goals },
-                { label: "7M", value: match.emreStats.sevenMeter },
-                { label: "Gult", value: match.emreStats.yellowCards, warn: match.emreStats.yellowCards > 0 },
-                { label: "2min", value: match.emreStats.twoMinutes, warn: match.emreStats.twoMinutes > 0 },
-                { label: "Rødt", value: match.emreStats.redCards, bad: match.emreStats.redCards > 0 },
-              ].map(({ label, value, warn, bad }) => (
-                <div
-                  key={label}
-                  className={`rounded p-1 ${
-                    bad
-                      ? "bg-red-50"
-                      : warn
-                      ? "bg-yellow-50"
-                      : "bg-gray-50"
-                  }`}
-                >
-                  <p
-                    className={`text-sm font-bold ${
-                      bad
-                        ? "text-red-700"
-                        : warn
-                        ? "text-yellow-700"
-                        : "text-gray-800"
-                    }`}
-                  >
-                    {value}
+            <div className="space-y-1.5">
+              <div className="grid grid-cols-2 gap-1 text-center">
+                <div className="rounded p-1 bg-gray-50">
+                  <p className="text-sm font-bold text-gray-800">
+                    {match.emreStats.goals + match.emreStats.sevenMeter}
+                    {match.emreStats.sevenMeter > 0 && (
+                      <span className="text-xs font-normal text-gray-400">
+                        {" "}
+                        ({match.emreStats.sevenMeter} 7m)
+                      </span>
+                    )}
                   </p>
-                  <p className="text-xs text-gray-400">{label}</p>
+                  <p className="text-xs text-gray-400">Mål</p>
                 </div>
-              ))}
+                <div className="rounded p-1 bg-gray-50">
+                  <p className="text-sm font-bold text-gray-800">
+                    {match.emreStats.minutesPlayed ?? "–"}
+                  </p>
+                  <p className="text-xs text-gray-400">Minutter</p>
+                </div>
+              </div>
+              {(match.emreStats.yellowCards > 0 ||
+                match.emreStats.twoMinutes > 0 ||
+                match.emreStats.redCards > 0) && (
+                <div className="flex items-center justify-center gap-1 text-sm">
+                  {Array.from({ length: match.emreStats.yellowCards }).map((_, i) => (
+                    <span key={`yellow-${i}`} title="Gult kort">
+                      🟨
+                    </span>
+                  ))}
+                  {Array.from({ length: match.emreStats.twoMinutes }).map((_, i) => (
+                    <span key={`two-${i}`} title="2 minutter">
+                      ✌️
+                    </span>
+                  ))}
+                  {Array.from({ length: match.emreStats.redCards }).map((_, i) => (
+                    <span key={`red-${i}`} title="Rødt kort">
+                      🟥
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           ) : (
             <p className="text-xs text-gray-400">I troppen</p>

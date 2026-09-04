@@ -5,6 +5,7 @@ import MinutesInput from "./MinutesInput";
 
 interface Props {
   match: MatchData;
+  onMinutesSaved?: (matchId: string, value: number | null) => void;
 }
 
 function formatDate(iso: string | null): string {
@@ -55,7 +56,7 @@ function ResultBadge({ match }: { match: MatchData }) {
   );
 }
 
-export default function MatchCard({ match }: Props) {
+export default function MatchCard({ match, onMinutesSaved }: Props) {
   const time = formatTime(match.date);
   const hnUrl = `https://www.handball.no/system/kamper/kamp/?matchid=${match.id}`;
 
@@ -113,6 +114,7 @@ export default function MatchCard({ match }: Props) {
                   matchId={match.id}
                   initialMinutes={match.emreStats?.minutesPlayed ?? null}
                   matchLength={match.teamMatchLength}
+                  onSaved={onMinutesSaved}
                 />
               </div>
             )}

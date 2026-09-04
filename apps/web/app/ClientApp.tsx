@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import type { MatchData, StatsResponse, TeamData, SeasonData, TeamStats } from "@/lib/types";
 import MatchCard from "@/components/MatchCard";
 import MatchTable from "@/components/MatchTable";
@@ -136,10 +136,26 @@ export default function ClientApp({ initialMatches, teams, seasons }: Props) {
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [selectedSeason, setSelectedSeason] = useState<number>(seasons[0]?.id ?? 1);
 
-  // All matches for the selected season
+  // Minutes just saved by the user, keyed by match id. The homepage is
+  // ISR-cached for 5 minutes, so a fresh save wouldn't show up here until
+  // that expires — apply it locally so switching table/card view (which
+  // remounts the input with server-provided data) doesn't lose it.
+  const [minutesOverrides, setMinutesOverrides] = useState<Record<string, number | null>>({});
+  const handleMinutesSaved = useCallback((matchId: string, value: number | null) => {
+    setMinutesOverrides((prev) => ({ ...prev, [matchId]: value }));
+  }, []);
+
+  // All matches for the selected season, with any local minutes override applied
   const seasonMatches = useMemo(
-    () => initialMatches.filter((m) => m.seasonId === selectedSeason),
-    [initialMatches, selectedSeason]
+    () =>
+      initialMatches
+        .filter((m) => m.seasonId === selectedSeason)
+        .map((m) =>
+          m.id in minutesOverrides && m.emreStats
+            ? { ...m, emreStats: { ...m.emreStats, minutesPlayed: minutesOverrides[m.id] } }
+            : m
+        ),
+    [initialMatches, selectedSeason, minutesOverrides]
   );
 
   // Teams that have at least one match in the selected season (preserving TEAM_ORDER sort)
@@ -297,14 +313,16 @@ export default function ClientApp({ initialMatches, teams, seasons }: Props) {
                   Ingen kamper funnet
                 </p>
               ) : (
-                filteredMatches.map((m) => <MatchCard key={m.id} match={m} />)
+                filteredMatches.map((m) => (
+                  <MatchCard key={m.id} match={m} onMinutesSaved={handleMinutesSaved} />
+                ))
               )}
             </div>
 
             {/* Desktop: table or cards */}
             <div className="hidden sm:block">
               {viewMode === "table" ? (
-                <MatchTable matches={filteredMatches} />
+                <MatchTable matches={filteredMatches} onMinutesSaved={handleMinutesSaved} />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {filteredMatches.length === 0 ? (
@@ -312,7 +330,9 @@ export default function ClientApp({ initialMatches, teams, seasons }: Props) {
                       Ingen kamper funnet
                     </p>
                   ) : (
-                    filteredMatches.map((m) => <MatchCard key={m.id} match={m} />)
+                    filteredMatches.map((m) => (
+                      <MatchCard key={m.id} match={m} onMinutesSaved={handleMinutesSaved} />
+                    ))
                   )}
                 </div>
               )}

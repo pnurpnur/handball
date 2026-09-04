@@ -15,6 +15,12 @@ const teamArg = args.find((a) => a.startsWith("--team="));
 /** Active post-match scrape timers, keyed by scheduled time (ms since epoch). */
 const scheduledTimers = new Map<number, ReturnType<typeof setTimeout>>();
 
+// Node's setTimeout overflows a 32-bit signed int (~24.8 days) and silently
+// fires almost immediately instead of waiting — cap how far out we'll set a
+// concrete timer. Anything further out gets picked up once it falls inside
+// this window, via the daily 08:00 cron re-running scheduleMatchScrapes().
+const MAX_TIMER_DELAY_MS = 20 * 24 * 60 * 60 * 1000; // 20 days
+
 /**
  * Schedule scrapes 2 hours after each upcoming match starts.
  * Groups matches within 10 minutes of each other into a single scrape.
@@ -53,9 +59,14 @@ async function scheduleMatchScrapes(): Promise<void> {
   }
 
   let scheduled = 0;
+  let deferred = 0;
   for (const scrapeAt of scrapeTimes) {
     const delay = scrapeAt - Date.now();
     if (delay <= 0) continue; // Already passed
+    if (delay > MAX_TIMER_DELAY_MS) {
+      deferred++;
+      continue; // Too far out for setTimeout; the daily cron will pick it up later
+    }
 
     const timer = setTimeout(async () => {
       scheduledTimers.delete(scrapeAt);
@@ -75,7 +86,9 @@ async function scheduleMatchScrapes(): Promise<void> {
   }
 
   console.log(
-    `[Scheduler] ${scheduled} post-match scrape(s) scheduled from ${upcoming.length} upcoming matches.`
+    `[Scheduler] ${scheduled} post-match scrape(s) scheduled from ${upcoming.length} upcoming matches` +
+      (deferred > 0 ? ` (${deferred} more than 20 days out, deferred to the daily cron)` : "") +
+      "."
   );
 }
 

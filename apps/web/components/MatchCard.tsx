@@ -107,19 +107,29 @@ export default function MatchCard({ match }: Props) {
           <span className="text-xs font-semibold text-gray-600 shrink-0">⚡ Emre</span>
           {match.emreStats ? (
             <>
-              <span className="text-xs bg-gray-50 text-gray-700 rounded px-1.5 py-0.5">
-                <span className="font-bold">
+              <div className="flex flex-col items-center rounded-lg bg-emerald-50 px-2.5 py-1 leading-tight">
+                <span className="text-sm font-bold text-emerald-700">
                   {match.emreStats.goals + match.emreStats.sevenMeter}
-                </span>{" "}
-                mål
-                {match.emreStats.sevenMeter > 0 && (
-                  <span className="text-gray-400"> ({match.emreStats.sevenMeter} 7m)</span>
-                )}
-              </span>
-              {match.emreStats.minutesPlayed !== null && (
-                <span className="text-xs bg-gray-50 text-gray-700 rounded px-1.5 py-0.5">
-                  <span className="font-bold">{match.emreStats.minutesPlayed}</span> min
+                  {match.emreStats.sevenMeter > 0 && (
+                    <span className="text-xs font-medium text-emerald-500">
+                      {" "}
+                      ({match.emreStats.sevenMeter})
+                    </span>
+                  )}
                 </span>
+                <span className="text-[10px] font-semibold text-emerald-600/70 tracking-wide">
+                  MÅL
+                </span>
+              </div>
+              {match.emreStats.minutesPlayed !== null && (
+                <div className="flex flex-col items-center rounded-lg bg-indigo-50 px-2.5 py-1 leading-tight">
+                  <span className="text-sm font-bold text-indigo-700">
+                    {match.emreStats.minutesPlayed}
+                  </span>
+                  <span className="text-[10px] font-semibold text-indigo-600/70 tracking-wide">
+                    MIN
+                  </span>
+                </div>
               )}
               {(match.emreStats.yellowCards > 0 ||
                 match.emreStats.twoMinutes > 0 ||

@@ -337,7 +337,7 @@ export default function ClientApp({ initialMatches, teams, seasons }: Props) {
                 </p>
               ) : (
                 filteredMatches.map((m) => (
-                  <MatchCard key={m.id} match={m} onMinutesSaved={handleMinutesSaved} />
+                  <MatchCard key={m.id} match={m} />
                 ))
               )}
             </div>
@@ -354,7 +354,7 @@ export default function ClientApp({ initialMatches, teams, seasons }: Props) {
                     </p>
                   ) : (
                     filteredMatches.map((m) => (
-                      <MatchCard key={m.id} match={m} onMinutesSaved={handleMinutesSaved} />
+                      <MatchCard key={m.id} match={m} />
                     ))
                   )}
                 </div>

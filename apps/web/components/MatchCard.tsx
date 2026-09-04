@@ -1,11 +1,9 @@
 "use client";
 
 import type { MatchData } from "@/lib/types";
-import MinutesInput from "./MinutesInput";
 
 interface Props {
   match: MatchData;
-  onMinutesSaved?: (matchId: string, value: number | null) => void;
 }
 
 function formatDate(iso: string | null): string {
@@ -56,7 +54,7 @@ function ResultBadge({ match }: { match: MatchData }) {
   );
 }
 
-export default function MatchCard({ match, onMinutesSaved }: Props) {
+export default function MatchCard({ match }: Props) {
   const time = formatTime(match.date);
   const hnUrl = `https://www.handball.no/system/kamper/kamp/?matchid=${match.id}`;
 
@@ -105,47 +103,28 @@ export default function MatchCard({ match, onMinutesSaved }: Props) {
 
       {/* Emre */}
       {match.emreInSquad && (
-        <div className="border-t border-gray-50 pt-2">
-          <div className="flex items-center justify-between gap-1.5 mb-1.5">
-            <span className="text-xs font-semibold text-gray-600">⚡ Emre</span>
-            {match.isPlayed && (
-              <div className="flex items-center gap-1">
-                <span className="text-xs text-gray-400">Min</span>
-                <MinutesInput
-                  matchId={match.id}
-                  initialMinutes={match.emreStats?.minutesPlayed ?? null}
-                  matchLength={match.teamMatchLength}
-                  onSaved={onMinutesSaved}
-                />
-              </div>
-            )}
-          </div>
+        <div className="border-t border-gray-50 pt-2 flex items-center gap-1.5 flex-wrap">
+          <span className="text-xs font-semibold text-gray-600 shrink-0">⚡ Emre</span>
           {match.emreStats ? (
-            <div className="space-y-1.5">
-              <div className="grid grid-cols-2 gap-1 text-center">
-                <div className="rounded p-1 bg-gray-50">
-                  <p className="text-sm font-bold text-gray-800">
-                    {match.emreStats.goals + match.emreStats.sevenMeter}
-                    {match.emreStats.sevenMeter > 0 && (
-                      <span className="text-xs font-normal text-gray-400">
-                        {" "}
-                        ({match.emreStats.sevenMeter} 7m)
-                      </span>
-                    )}
-                  </p>
-                  <p className="text-xs text-gray-400">Mål</p>
-                </div>
-                <div className="rounded p-1 bg-gray-50">
-                  <p className="text-sm font-bold text-gray-800">
-                    {match.emreStats.minutesPlayed ?? "–"}
-                  </p>
-                  <p className="text-xs text-gray-400">Minutter</p>
-                </div>
-              </div>
+            <>
+              <span className="text-xs bg-gray-50 text-gray-700 rounded px-1.5 py-0.5">
+                <span className="font-bold">
+                  {match.emreStats.goals + match.emreStats.sevenMeter}
+                </span>{" "}
+                mål
+                {match.emreStats.sevenMeter > 0 && (
+                  <span className="text-gray-400"> ({match.emreStats.sevenMeter} 7m)</span>
+                )}
+              </span>
+              {match.emreStats.minutesPlayed !== null && (
+                <span className="text-xs bg-gray-50 text-gray-700 rounded px-1.5 py-0.5">
+                  <span className="font-bold">{match.emreStats.minutesPlayed}</span> min
+                </span>
+              )}
               {(match.emreStats.yellowCards > 0 ||
                 match.emreStats.twoMinutes > 0 ||
                 match.emreStats.redCards > 0) && (
-                <div className="flex items-center justify-center gap-1 text-sm">
+                <span className="flex items-center gap-0.5 text-sm">
                   {Array.from({ length: match.emreStats.yellowCards }).map((_, i) => (
                     <span key={`yellow-${i}`} title="Gult kort">
                       🟨
@@ -161,11 +140,11 @@ export default function MatchCard({ match, onMinutesSaved }: Props) {
                       🟥
                     </span>
                   ))}
-                </div>
+                </span>
               )}
-            </div>
+            </>
           ) : (
-            <p className="text-xs text-gray-400">I troppen</p>
+            <span className="text-xs text-gray-400">I troppen</span>
           )}
         </div>
       )}

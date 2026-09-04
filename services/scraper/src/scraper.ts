@@ -1,4 +1,3 @@
-import { chromium, Browser } from "playwright";
 import * as cheerio from "cheerio";
 import axios from "axios";
 import {
@@ -57,6 +56,18 @@ interface TerminlisteApiResponse {
   matches: ApiMatch[];
 }
 
+/** One player entry from the match page's <match-info> :home-players / :away-players JSON props. */
+interface ApiPlayer {
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  spillerMaal: number; // field goals (excludes penalties)
+  sjuMeterMaal: number; // 7m/penalty goals
+  toMinutter: number; // 2-minute suspensions
+  advarsel: number; // yellow cards
+  diskvalifikasjon: number; // red cards
+}
+
 interface PlayerStats {
   name: string;
   goals: number;
@@ -76,25 +87,6 @@ interface MatchDetails {
   venue: string | null;
   emreInSquad: boolean;
   emreStats: PlayerStats | null;
-}
-
-let browser: Browser | null = null;
-
-async function getBrowser(): Promise<Browser> {
-  if (!browser) {
-    browser = await chromium.launch({
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
-  }
-  return browser;
-}
-
-export async function closeBrowser(): Promise<void> {
-  if (browser) {
-    await browser.close();
-    browser = null;
-  }
 }
 
 /**
@@ -204,22 +196,22 @@ async function fetchTeamMatches(teamId: number): Promise<{
  *   Row 3: "Turnering:"  | "3. divisjon Menn, NTE MidtNorge-serien"
  *   Row 4: "Sted:"       | "Stamneshallen"
  *
- * Player stats tables (table.player-table):
- *   Header: Nr | Spiller | M | 7M | A | 2 | D | R
+ * Player stats are server-rendered as JSON in the ":home-players" and
+ * ":away-players" attributes of a <match-info> element (a Vue component
+ * whose props are baked into the initial HTML — no client-side JS needed
+ * to read them).
  */
 async function scrapeMatchDetails(
   matchId: string
 ): Promise<MatchDetails | null> {
-  const b = await getBrowser();
-  const page = await b.newPage();
-
   try {
-    await page.goto(MATCH_PAGE(matchId), {
-      waitUntil: "domcontentloaded",
+    const { data: html } = await axios.get<string>(MATCH_PAGE(matchId), {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      },
       timeout: 20000,
     });
-
-    const html = await page.content();
     const $ = cheerio.load(html);
 
     if ($("body").text().includes("Kampen finnes ikke")) return null;
@@ -269,50 +261,44 @@ async function scrapeMatchDetails(
       }
     });
 
-    // --- Emre's stats from player tables ---
+    // --- Emre's stats from the <match-info> component's JSON props ---
     let emreInSquad = false;
     let emreStats: PlayerStats | null = null;
 
     const emreFirst = EMRE_NAME.split(" ")[0].toLowerCase();
     const emreLast = EMRE_NAME.split(" ").slice(-1)[0].toLowerCase();
 
-    // table.player-table: Nr | Spiller | M | 7M | A | 2 | D | R
-    $("table.player-table").each((_ti, table) => {
-      $(table)
-        .find("tr")
-        .each((_ri, row) => {
-          const cells = $(row).find("td");
-          if (cells.length < 3) return;
+    const matchInfoEl = $("match-info").first();
+    const parsePlayers = (attr: string): ApiPlayer[] => {
+      const raw = matchInfoEl.attr(attr);
+      if (!raw) return [];
+      try {
+        return JSON.parse(raw) as ApiPlayer[];
+      } catch {
+        return [];
+      }
+    };
+    const allPlayers = [
+      ...parsePlayers(":home-players"),
+      ...parsePlayers(":away-players"),
+    ];
 
-          let nameIdx = -1;
-          cells.each((ci, cell) => {
-            const text = $(cell).text().trim().toLowerCase();
-            if (text.includes(emreFirst) && text.includes(emreLast)) {
-              nameIdx = ci;
-            }
-          });
-
-          if (nameIdx === -1) return;
-
-          emreInSquad = true;
-          const allVals = cells.map((_, c) => $(c).text().trim()).get();
-
-          const parseStat = (offset: number): number => {
-            const v = allVals[nameIdx + offset];
-            if (!v || v === "-" || v === "") return 0;
-            return parseInt(v) || 0;
-          };
-
-          emreStats = {
-            name: cells.eq(nameIdx).text().trim(),
-            goals: parseStat(1),      // M
-            sevenMeter: parseStat(2), // 7M
-            yellowCards: parseStat(3), // A
-            twoMinutes: parseStat(4), // 2
-            redCards: parseStat(5),   // D
-          };
-        });
+    const emrePlayer = allPlayers.find((p) => {
+      const full = `${p.firstName} ${p.lastName}`.toLowerCase();
+      return full.includes(emreFirst) && full.includes(emreLast);
     });
+
+    if (emrePlayer) {
+      emreInSquad = true;
+      emreStats = {
+        name: emrePlayer.fullName,
+        goals: emrePlayer.spillerMaal,
+        sevenMeter: emrePlayer.sjuMeterMaal,
+        yellowCards: emrePlayer.advarsel,
+        twoMinutes: emrePlayer.toMinutter,
+        redCards: emrePlayer.diskvalifikasjon,
+      };
+    }
 
     return {
       homeTeam,
@@ -328,8 +314,6 @@ async function scrapeMatchDetails(
   } catch (err) {
     console.error(`Error scraping match ${matchId}: ${formatError(err)}`);
     return null;
-  } finally {
-    await page.close();
   }
 }
 
@@ -514,6 +498,5 @@ export async function scrapeAll(): Promise<void> {
     await sleep(3000);
   }
 
-  await closeBrowser();
   console.log(`[Scraper] Done. Total matches updated: ${totalUpdated}`);
 }

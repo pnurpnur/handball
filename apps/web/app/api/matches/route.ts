@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
   const matches = await prisma.match.findMany({
     where,
     include: {
-      team: { select: { id: true, name: true } },
+      team: { select: { id: true, name: true, matchLengthMinutes: true } },
       emreStats: true,
     },
     orderBy: { date: "asc" },
@@ -42,6 +42,7 @@ export async function GET(req: NextRequest) {
     isPlayed: m.isPlayed,
     venue: m.venue,
     emreInSquad: m.emreInSquad,
+    teamMatchLength: m.team.matchLengthMinutes,
     emreStats: m.emreStats
       ? {
           goals: m.emreStats.goals,
@@ -49,6 +50,7 @@ export async function GET(req: NextRequest) {
           yellowCards: m.emreStats.yellowCards,
           twoMinutes: m.emreStats.twoMinutes,
           redCards: m.emreStats.redCards,
+          minutesPlayed: m.emreStats.minutesPlayed,
         }
       : null,
   }));

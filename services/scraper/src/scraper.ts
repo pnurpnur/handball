@@ -1,7 +1,24 @@
 import { chromium, Browser } from "playwright";
 import * as cheerio from "cheerio";
-import { TEAM_IDS, CURRENT_SEASON_ID, EMRE_NAME, TEAM_PAGE, MATCH_PAGE } from "./config";
+import {
+  TEAM_IDS,
+  TEAM_CONFIG,
+  CURRENT_SEASON_ID,
+  CURRENT_SEASON_NAME,
+  EMRE_NAME,
+  TEAM_PAGE,
+  MATCH_PAGE,
+} from "./config";
 import { prisma } from "./db";
+
+/** Creates the current season row on first use each run; no-op afterwards. */
+async function ensureSeason(): Promise<void> {
+  await prisma.season.upsert({
+    where: { id: CURRENT_SEASON_ID },
+    update: {},
+    create: { id: CURRENT_SEASON_ID, name: CURRENT_SEASON_NAME },
+  });
+}
 
 interface MatchRow {
   matchId: string;
@@ -336,12 +353,15 @@ export async function scrapeTeam(teamId: number): Promise<number> {
   let matchesUpdated = 0;
 
   try {
+    await ensureSeason();
+
     const { teamName, matches } = await scrapeTeamPage(teamId);
+    const matchLength = TEAM_CONFIG[teamId]?.matchLength;
 
     await prisma.team.upsert({
       where: { id: teamId },
-      update: { name: teamName, updatedAt: new Date() },
-      create: { id: teamId, name: teamName },
+      update: { name: teamName, matchLengthMinutes: matchLength, updatedAt: new Date() },
+      create: { id: teamId, name: teamName, matchLengthMinutes: matchLength },
     });
 
     for (const match of matches) {

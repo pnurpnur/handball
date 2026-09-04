@@ -1,6 +1,7 @@
 "use client";
 
 import type { MatchData } from "@/lib/types";
+import MinutesInput from "./MinutesInput";
 
 interface Props {
   matches: MatchData[];
@@ -87,12 +88,15 @@ export default function MatchTable({ matches }: Props) {
             <th className="text-center px-2 py-2.5 font-medium text-gray-500 text-xs">
               D
             </th>
+            <th className="text-center px-2 py-2.5 font-medium text-gray-500 text-xs whitespace-nowrap">
+              Spilletid
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-50 bg-white">
           {matches.length === 0 && (
             <tr>
-              <td colSpan={12} className="text-center py-10 text-gray-400">
+              <td colSpan={13} className="text-center py-10 text-gray-400">
                 Ingen kamper funnet
               </td>
             </tr>
@@ -162,6 +166,17 @@ export default function MatchTable({ matches }: Props) {
                   </span>
                 ) : (
                   match.emreInSquad ? "0" : "–"
+                )}
+              </td>
+              <td className="px-2 py-2.5 text-center" onClick={(e) => e.stopPropagation()}>
+                {match.isPlayed && match.emreInSquad ? (
+                  <MinutesInput
+                    matchId={match.id}
+                    initialMinutes={match.emreStats?.minutesPlayed ?? null}
+                    matchLength={match.teamMatchLength}
+                  />
+                ) : (
+                  <span className="text-gray-300 text-sm">–</span>
                 )}
               </td>
             </tr>

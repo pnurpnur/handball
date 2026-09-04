@@ -12,7 +12,7 @@ async function getSeasons(): Promise<SeasonData[]> {
 
 async function getTeams(): Promise<TeamData[]> {
   const teams = await prisma.team.findMany({
-    select: { id: true, name: true },
+    select: { id: true, name: true, matchLengthMinutes: true },
   });
   return teams.sort((a, b) => {
     const ai = TEAM_ORDER.indexOf(a.id);
@@ -27,7 +27,7 @@ async function getTeams(): Promise<TeamData[]> {
 async function getMatches(): Promise<MatchData[]> {
   const matches = await prisma.match.findMany({
     include: {
-      team: { select: { id: true, name: true } },
+      team: { select: { id: true, name: true, matchLengthMinutes: true } },
       emreStats: true,
     },
     orderBy: { date: "asc" },
@@ -47,6 +47,7 @@ async function getMatches(): Promise<MatchData[]> {
     isPlayed: m.isPlayed,
     venue: m.venue,
     emreInSquad: m.emreInSquad,
+    teamMatchLength: m.team.matchLengthMinutes,
     emreStats: m.emreStats
       ? {
           goals: m.emreStats.goals,
@@ -54,6 +55,7 @@ async function getMatches(): Promise<MatchData[]> {
           yellowCards: m.emreStats.yellowCards,
           twoMinutes: m.emreStats.twoMinutes,
           redCards: m.emreStats.redCards,
+          minutesPlayed: m.emreStats.minutesPlayed,
         }
       : null,
   }));

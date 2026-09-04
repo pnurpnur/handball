@@ -16,12 +16,13 @@ model Season {
 }
 
 model Team {
-  id          Int       @id // handball.no lag-ID
-  name        String
-  shortName   String?
-  clubName    String?
-  updatedAt   DateTime  @updatedAt
-  createdAt   DateTime  @default(now())
+  id                 Int       @id // handball.no lag-ID
+  name               String
+  shortName          String?
+  clubName           String?
+  matchLengthMinutes Int? // full match length in minutes, used to calc Emre's playing-time %
+  updatedAt          DateTime  @updatedAt
+  createdAt          DateTime  @default(now())
 
   matches     Match[]
 }
@@ -64,6 +65,8 @@ model EmreStats {
   yellowCards Int     @default(0)
   twoMinutes  Int     @default(0)
   redCards    Int     @default(0)
+
+  minutesPlayed Int? // manually entered per match, not available in handball.no reports
 }
 
 model ScrapeLog {

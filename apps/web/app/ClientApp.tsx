@@ -50,6 +50,20 @@ function toTeamStats(s: S, teamId: number, teamName: string): TeamStats {
   };
 }
 
+function minutesStats(tm: MatchData[]) {
+  const withMinutes = tm.filter(
+    (m) => m.isPlayed && m.emreInSquad && m.emreStats?.minutesPlayed != null && m.teamMatchLength != null
+  );
+  const minutesPlayed = withMinutes.reduce((s, m) => s + m.emreStats!.minutesPlayed!, 0);
+  const minutesPossible = withMinutes.reduce((s, m) => s + m.teamMatchLength!, 0);
+  return {
+    minutesPlayed,
+    minutesPossible,
+    minutesPct: minutesPossible > 0 ? Math.round((minutesPlayed / minutesPossible) * 100) : null,
+    matchesWithMinutes: withMinutes.length,
+  };
+}
+
 function buildStats(teams: TeamData[], matches: MatchData[]): StatsResponse {
   const perTeam: StatsResponse["perTeam"] = {};
   for (const team of teams) {
@@ -67,6 +81,7 @@ function buildStats(teams: TeamData[], matches: MatchData[]): StatsResponse {
       withoutEmre: toTeamStats(wo, team.id, "Uten Emre"),
       emreGoals: teamEmreGoals,
       emreAvgGoals: teamEmreStats.length > 0 ? Math.round((teamEmreGoals / teamEmreStats.length) * 100) / 100 : 0,
+      ...minutesStats(tm),
     };
   }
 
@@ -86,6 +101,8 @@ function buildStats(teams: TeamData[], matches: MatchData[]): StatsResponse {
   const sum = (fn: (e: typeof emreStats[0]) => number) => emreStats.reduce((s, e) => s + fn(e), 0);
   const combinedEmreGoals = sum((e) => e.goals + e.sevenMeter);
 
+  const combinedMinutes = minutesStats(matches);
+
   return {
     teams,
     perTeam,
@@ -95,6 +112,7 @@ function buildStats(teams: TeamData[], matches: MatchData[]): StatsResponse {
       withoutEmre: toTeamStats(cwo, 0, "Uten Emre"),
       emreGoals: combinedEmreGoals,
       emreAvgGoals: avg(combinedEmreGoals),
+      ...combinedMinutes,
     },
     emre: {
       matchesPlayed: ep,
@@ -105,6 +123,7 @@ function buildStats(teams: TeamData[], matches: MatchData[]): StatsResponse {
       avgGoals: avg(sum((e) => e.goals + e.sevenMeter)),
       avgYellowCards: avg(sum((e) => e.yellowCards)),
       avgTwoMinutes: avg(sum((e) => e.twoMinutes)),
+      ...combinedMinutes,
     },
   };
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import type { MatchData } from "@/lib/types";
+import MinutesInput from "./MinutesInput";
 
 interface Props {
   match: MatchData;
@@ -103,8 +104,18 @@ export default function MatchCard({ match }: Props) {
       {/* Emre */}
       {match.emreInSquad && (
         <div className="border-t border-gray-50 pt-2">
-          <div className="flex items-center gap-1.5 mb-1.5">
+          <div className="flex items-center justify-between gap-1.5 mb-1.5">
             <span className="text-xs font-semibold text-gray-600">⚡ Emre</span>
+            {match.isPlayed && (
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-gray-400">Min</span>
+                <MinutesInput
+                  matchId={match.id}
+                  initialMinutes={match.emreStats?.minutesPlayed ?? null}
+                  matchLength={match.teamMatchLength}
+                />
+              </div>
+            )}
           </div>
           {match.emreStats ? (
             <div className="grid grid-cols-5 gap-1 text-center">

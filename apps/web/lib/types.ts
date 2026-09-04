@@ -6,6 +6,7 @@ export interface SeasonData {
 export interface TeamData {
   id: number;
   name: string;
+  matchLengthMinutes?: number | null;
 }
 
 export interface EmreStatsData {
@@ -14,6 +15,7 @@ export interface EmreStatsData {
   yellowCards: number;
   twoMinutes: number;
   redCards: number;
+  minutesPlayed: number | null;
 }
 
 export interface MatchData {
@@ -31,6 +33,7 @@ export interface MatchData {
   venue: string | null;
   emreInSquad: boolean;
   emreStats: EmreStatsData | null;
+  teamMatchLength: number | null;
 }
 
 export interface TeamStats {
@@ -61,6 +64,10 @@ export interface EmreOverallStats {
   avgGoals: number;
   avgYellowCards: number;
   avgTwoMinutes: number;
+  minutesPlayed: number;         // sum of minutes entered
+  minutesPossible: number;       // sum of team match length for matches with minutes entered
+  minutesPct: number | null;     // minutesPlayed / minutesPossible * 100
+  matchesWithMinutes: number;    // how many matches have minutes entered
 }
 
 export interface StatsResponse {
@@ -74,6 +81,10 @@ export interface StatsResponse {
       overall: TeamStats;
       emreGoals: number;
       emreAvgGoals: number;
+      minutesPlayed: number;
+      minutesPossible: number;
+      minutesPct: number | null;
+      matchesWithMinutes: number;
     }
   >;
   combined: {
@@ -82,6 +93,10 @@ export interface StatsResponse {
     overall: TeamStats;
     emreGoals: number;
     emreAvgGoals: number;
+    minutesPlayed: number;
+    minutesPossible: number;
+    minutesPct: number | null;
+    matchesWithMinutes: number;
   };
   emre: EmreOverallStats;
 }

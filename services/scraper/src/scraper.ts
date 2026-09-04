@@ -10,8 +10,12 @@ import {
   EMRE_NAME,
   MATCH_PAGE,
   TERMINLISTE_API,
+  BASE_URL,
 } from "./config";
 import { prisma } from "./db";
+import { formatError } from "./util";
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** Creates the current season row on first use each run; no-op afterwards. */
 async function ensureSeason(): Promise<void> {
@@ -127,15 +131,34 @@ async function fetchTeamMatches(teamId: number): Promise<{
   const url = TERMINLISTE_API(teamId, HANDBALL_SEASON_ID);
   console.log(`  Fetching fixture list for ${teamId}...`);
 
-  const { data } = await axios.get<TerminlisteApiResponse>(url, {
-    headers: {
-      Accept: "application/json, text/plain, */*",
-      "X-Requested-With": "XMLHttpRequest",
-      "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    },
-    timeout: 20000,
-  });
+  const headers = {
+    Accept: "application/json, text/plain, */*",
+    "X-Requested-With": "XMLHttpRequest",
+    "User-Agent":
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    Referer: `${BASE_URL}/system/kamper/lag/?lagid=${teamId}`,
+  };
+
+  // handball.no rate-limits this endpoint; retry a couple of times with
+  // backoff on 429 before giving up on this team for this run.
+  let lastErr: unknown;
+  let data: TerminlisteApiResponse | undefined;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt > 0) await sleep(5000 * attempt);
+    try {
+      const res = await axios.get<TerminlisteApiResponse>(url, {
+        headers,
+        timeout: 20000,
+      });
+      data = res.data;
+      break;
+    } catch (err) {
+      lastErr = err;
+      if (!axios.isAxiosError(err) || err.response?.status !== 429) throw err;
+      console.log(`  Rate limited fetching ${teamId}, retrying (attempt ${attempt + 1})...`);
+    }
+  }
+  if (!data) throw lastErr;
 
   let teamName = `Team ${teamId}`;
   const matches: MatchRow[] = (data.matches ?? []).map((m) => {
@@ -303,7 +326,7 @@ async function scrapeMatchDetails(
       emreStats,
     };
   } catch (err) {
-    console.error(`Error scraping match ${matchId}:`, err);
+    console.error(`Error scraping match ${matchId}: ${formatError(err)}`);
     return null;
   } finally {
     await page.close();
@@ -445,8 +468,7 @@ export async function scrapeTeam(teamId: number): Promise<number> {
         matchesUpdated++;
       } catch (matchErr) {
         console.error(
-          `  Error processing match ${match.matchId}:`,
-          matchErr
+          `  Error processing match ${match.matchId}: ${formatError(matchErr)}`
         );
       }
     }
@@ -462,7 +484,7 @@ export async function scrapeTeam(teamId: number): Promise<number> {
 
     return matchesUpdated;
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
+    const message = formatError(err);
     await prisma.scrapeLog.create({
       data: {
         teamId,
@@ -486,8 +508,10 @@ export async function scrapeAll(): Promise<void> {
       totalUpdated += updated;
       console.log(`[Scraper] Team ${teamId}: ${updated} matches updated`);
     } catch (err) {
-      console.error(`[Scraper] Failed for team ${teamId}:`, err);
+      console.error(`[Scraper] Failed for team ${teamId}: ${formatError(err)}`);
     }
+    // Space out requests between teams to avoid tripping handball.no's rate limit.
+    await sleep(3000);
   }
 
   await closeBrowser();

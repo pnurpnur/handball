@@ -3,6 +3,10 @@ import { CronJob } from "cron";
 import { scrapeAll, scrapeTeam } from "./scraper";
 import { prisma } from "./db";
 import { TEAM_IDS } from "./config";
+import { formatError } from "./util";
+
+const logError = (label: string) => (err: unknown) =>
+  console.error(`${label}: ${formatError(err)}`);
 
 const args = process.argv.slice(2);
 const runOnce = args.includes("--once");
@@ -58,9 +62,9 @@ async function scheduleMatchScrapes(): Promise<void> {
       console.log(
         `[Scheduler] Post-match scrape triggered (scheduled for ${new Date(scrapeAt).toISOString()})`
       );
-      await scrapeAll().catch(console.error);
+      await scrapeAll().catch(logError("[Scheduler] scrapeAll failed"));
       // Reschedule for any new matches added since last run
-      await scheduleMatchScrapes().catch(console.error);
+      await scheduleMatchScrapes().catch(logError("[Scheduler] scheduleMatchScrapes failed"));
     }, delay);
 
     scheduledTimers.set(scrapeAt, timer);
@@ -99,8 +103,8 @@ async function main() {
     "0 8 * * *",
     async () => {
       console.log("[Cron] Morning scrape...");
-      await scrapeAll().catch(console.error);
-      await scheduleMatchScrapes().catch(console.error);
+      await scrapeAll().catch(logError("[Cron] scrapeAll failed"));
+      await scheduleMatchScrapes().catch(logError("[Cron] scheduleMatchScrapes failed"));
     },
     null,
     true,
@@ -129,11 +133,11 @@ async function main() {
       res.end(JSON.stringify({ ok: true }));
 
       if (teamId && TEAM_IDS.includes(teamId)) {
-        scrapeTeam(teamId).catch(console.error);
+        scrapeTeam(teamId).catch(logError(`[Webhook] scrapeTeam(${teamId}) failed`));
       } else {
         scrapeAll()
           .then(() => scheduleMatchScrapes())
-          .catch(console.error);
+          .catch(logError("[Webhook] scrapeAll failed"));
       }
       return;
     }
@@ -165,7 +169,7 @@ async function main() {
     console.log("[Scraper] Initial scrape on startup (background)...");
     scrapeAll()
       .then(() => scheduleMatchScrapes())
-      .catch(console.error);
+      .catch(logError("[Startup] scrapeAll failed"));
   });
 
   process.on("SIGTERM", async () => {
@@ -178,6 +182,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error("[Scraper] Fatal error:", err);
+  console.error(`[Scraper] Fatal error: ${formatError(err)}`);
   process.exit(1);
 });

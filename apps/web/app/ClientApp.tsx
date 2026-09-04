@@ -133,7 +133,7 @@ export default function ClientApp({ initialMatches, teams, seasons }: Props) {
   const [teamFilter, setTeamFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortKey, setSortKey] = useState<SortKey>("date_asc");
-  const [viewMode, setViewMode] = useState<ViewMode>("table");
+  const [viewMode, setViewMode] = useState<ViewMode>("cards");
   const [selectedSeason, setSelectedSeason] = useState<number>(seasons[0]?.id ?? 1);
 
   // Minutes just saved by the user, keyed by match id. The homepage is

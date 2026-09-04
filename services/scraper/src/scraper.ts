@@ -367,7 +367,7 @@ export async function scrapeTeam(teamId: number): Promise<number> {
               date: match.date ?? existing?.date,
               venue: match.venue || details?.venue || existing?.venue,
               tournament:
-                details?.tournament || match.tournament || existing?.tournament || "",
+                match.tournament || details?.tournament || existing?.tournament || "",
               emreInSquad: details?.emreInSquad ?? false,
               scrapedAt: new Date(),
             },
@@ -382,7 +382,7 @@ export async function scrapeTeam(teamId: number): Promise<number> {
               isPlayed: true,
               date: match.date,
               venue: match.venue || details?.venue,
-              tournament: details?.tournament || match.tournament || "",
+              tournament: match.tournament || details?.tournament || "",
               emreInSquad: details?.emreInSquad ?? false,
               scrapedAt: new Date(),
             },
@@ -413,9 +413,8 @@ export async function scrapeTeam(teamId: number): Promise<number> {
             });
           }
         } else {
-          // Unplayed match – fetch match page for accurate tournament name and venue
-          const details = await scrapeMatchDetails(match.matchId);
-
+          // Unplayed match – the fixture-list API already has reliable
+          // tournament/venue/date, no need to fetch the match-detail page.
           await prisma.match.upsert({
             where: { id: match.matchId },
             update: {
@@ -427,9 +426,8 @@ export async function scrapeTeam(teamId: number): Promise<number> {
               awayScore: null,
               isPlayed: false,
               date: match.date ?? existing?.date,
-              venue: match.venue || details?.venue || existing?.venue,
-              tournament:
-                details?.tournament || match.tournament || existing?.tournament || "",
+              venue: match.venue || existing?.venue,
+              tournament: match.tournament || existing?.tournament || "",
               scrapedAt: new Date(),
             },
             create: {
@@ -442,8 +440,8 @@ export async function scrapeTeam(teamId: number): Promise<number> {
               awayScore: null,
               isPlayed: false,
               date: match.date,
-              venue: match.venue || details?.venue,
-              tournament: details?.tournament || match.tournament || "",
+              venue: match.venue,
+              tournament: match.tournament || "",
               scrapedAt: new Date(),
             },
           });

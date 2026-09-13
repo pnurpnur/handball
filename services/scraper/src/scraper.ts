@@ -354,6 +354,14 @@ export async function scrapeTeam(teamId: number): Promise<number> {
           // Fetch match page for tournament details and Emre stats
           const details = await scrapeMatchDetails(match.matchId);
 
+          // Once we've confirmed Emre played in a match, treat that as a
+          // sticky fact: a later re-scrape that fails to find him (page not
+          // fully loaded yet, a transient parse miss, a report published
+          // late) must never flip this back to false or wipe emreStats —
+          // that field also holds minutesPlayed, which is entered manually
+          // and would otherwise get silently destroyed by the next scrape.
+          const emreInSquad = details?.emreInSquad || existing?.emreInSquad || false;
+
           await prisma.match.upsert({
             where: { id: match.matchId },
             update: {
@@ -368,7 +376,7 @@ export async function scrapeTeam(teamId: number): Promise<number> {
               venue: match.venue || details?.venue || existing?.venue,
               tournament:
                 match.tournament || details?.tournament || existing?.tournament || "",
-              emreInSquad: details?.emreInSquad ?? false,
+              emreInSquad,
               scrapedAt: new Date(),
             },
             create: {
@@ -383,11 +391,14 @@ export async function scrapeTeam(teamId: number): Promise<number> {
               date: match.date,
               venue: match.venue || details?.venue,
               tournament: match.tournament || details?.tournament || "",
-              emreInSquad: details?.emreInSquad ?? false,
+              emreInSquad,
               scrapedAt: new Date(),
             },
           });
 
+          // Only touch emreStats when this scrape actually found Emre's
+          // line — never delete it just because this particular scrape
+          // didn't find him (see note above).
           if (details?.emreInSquad && details.emreStats) {
             await prisma.emreStats.upsert({
               where: { matchId: match.matchId },
@@ -406,10 +417,6 @@ export async function scrapeTeam(teamId: number): Promise<number> {
                 twoMinutes: details.emreStats.twoMinutes,
                 redCards: details.emreStats.redCards,
               },
-            });
-          } else if (details && !details.emreInSquad) {
-            await prisma.emreStats.deleteMany({
-              where: { matchId: match.matchId },
             });
           }
         } else {

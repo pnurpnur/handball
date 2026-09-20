@@ -1,7 +1,6 @@
 "use client";
 
 import type { MatchData } from "@/lib/types";
-import MinutesInput from "./MinutesInput";
 
 interface Props {
   match: MatchData;
@@ -64,6 +63,7 @@ export default function MatchCard({ match }: Props) {
       href={hnUrl}
       target="_blank"
       rel="noopener noreferrer"
+      data-match-id={match.id}
       className="block bg-white rounded-xl shadow-sm border border-gray-100 p-4 space-y-3 hover:border-sky-200 hover:shadow-md transition-all"
     >
       {/* Header: date + team + tournament */}
@@ -103,56 +103,58 @@ export default function MatchCard({ match }: Props) {
 
       {/* Emre */}
       {match.emreInSquad && (
-        <div className="border-t border-gray-50 pt-2">
-          <div className="flex items-center justify-between gap-1.5 mb-1.5">
-            <span className="text-xs font-semibold text-gray-600">⚡ Emre</span>
-            {match.isPlayed && (
-              <div className="flex items-center gap-1">
-                <span className="text-xs text-gray-400">Min</span>
-                <MinutesInput
-                  matchId={match.id}
-                  initialMinutes={match.emreStats?.minutesPlayed ?? null}
-                  matchLength={match.teamMatchLength}
-                />
-              </div>
-            )}
-          </div>
+        <div className="border-t border-gray-50 pt-2 flex items-center gap-1.5 flex-wrap">
+          <span className="text-xs font-semibold text-gray-600 shrink-0">⚡ Emre</span>
           {match.emreStats ? (
-            <div className="grid grid-cols-5 gap-1 text-center">
-              {[
-                { label: "Mål", value: match.emreStats.goals },
-                { label: "7M", value: match.emreStats.sevenMeter },
-                { label: "Gult", value: match.emreStats.yellowCards, warn: match.emreStats.yellowCards > 0 },
-                { label: "2min", value: match.emreStats.twoMinutes, warn: match.emreStats.twoMinutes > 0 },
-                { label: "Rødt", value: match.emreStats.redCards, bad: match.emreStats.redCards > 0 },
-              ].map(({ label, value, warn, bad }) => (
-                <div
-                  key={label}
-                  className={`rounded p-1 ${
-                    bad
-                      ? "bg-red-50"
-                      : warn
-                      ? "bg-yellow-50"
-                      : "bg-gray-50"
-                  }`}
-                >
-                  <p
-                    className={`text-sm font-bold ${
-                      bad
-                        ? "text-red-700"
-                        : warn
-                        ? "text-yellow-700"
-                        : "text-gray-800"
-                    }`}
-                  >
-                    {value}
-                  </p>
-                  <p className="text-xs text-gray-400">{label}</p>
+            <>
+              <div className="flex flex-col items-center rounded-lg bg-emerald-50 px-2.5 py-1 leading-tight">
+                <span className="text-sm font-bold text-emerald-700">
+                  {match.emreStats.goals + match.emreStats.sevenMeter}
+                  {match.emreStats.sevenMeter > 0 && (
+                    <span className="text-xs font-medium text-emerald-500">
+                      {" "}
+                      ({match.emreStats.sevenMeter})
+                    </span>
+                  )}
+                </span>
+                <span className="text-[10px] font-semibold text-emerald-600/70 tracking-wide">
+                  MÅL
+                </span>
+              </div>
+              {match.emreStats.minutesPlayed !== null && (
+                <div className="flex flex-col items-center rounded-lg bg-indigo-50 px-2.5 py-1 leading-tight">
+                  <span className="text-sm font-bold text-indigo-700">
+                    {match.emreStats.minutesPlayed}
+                  </span>
+                  <span className="text-[10px] font-semibold text-indigo-600/70 tracking-wide">
+                    MIN
+                  </span>
                 </div>
-              ))}
-            </div>
+              )}
+              {(match.emreStats.yellowCards > 0 ||
+                match.emreStats.twoMinutes > 0 ||
+                match.emreStats.redCards > 0) && (
+                <span className="flex items-center gap-0.5 text-sm">
+                  {Array.from({ length: match.emreStats.yellowCards }).map((_, i) => (
+                    <span key={`yellow-${i}`} title="Gult kort">
+                      🟨
+                    </span>
+                  ))}
+                  {Array.from({ length: match.emreStats.twoMinutes }).map((_, i) => (
+                    <span key={`two-${i}`} title="2 minutter">
+                      ✌️
+                    </span>
+                  ))}
+                  {Array.from({ length: match.emreStats.redCards }).map((_, i) => (
+                    <span key={`red-${i}`} title="Rødt kort">
+                      🟥
+                    </span>
+                  ))}
+                </span>
+              )}
+            </>
           ) : (
-            <p className="text-xs text-gray-400">I troppen</p>
+            <span className="text-xs text-gray-400">I troppen</span>
           )}
         </div>
       )}

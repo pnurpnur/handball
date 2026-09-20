@@ -5,6 +5,7 @@ import MinutesInput from "./MinutesInput";
 
 interface Props {
   matches: MatchData[];
+  onMinutesSaved?: (matchId: string, value: number | null) => void;
 }
 
 function formatDate(iso: string | null): string {
@@ -46,7 +47,7 @@ function WinIndicator({ match }: { match: MatchData }) {
   return <span className="text-red-600 font-semibold text-xs">T</span>;
 }
 
-export default function MatchTable({ matches }: Props) {
+export default function MatchTable({ matches, onMinutesSaved }: Props) {
   return (
     <div className="table-scroll rounded-xl border border-gray-100 shadow-sm">
       <table className="min-w-full text-sm">
@@ -104,6 +105,7 @@ export default function MatchTable({ matches }: Props) {
           {matches.map((match) => (
             <tr
               key={match.id}
+              data-match-id={match.id}
               className="hover:bg-sky-50/50 transition-colors cursor-pointer"
               onClick={() => window.open(`https://www.handball.no/system/kamper/kamp/?matchid=${match.id}`, "_blank", "noopener,noreferrer")}
             >
@@ -174,6 +176,7 @@ export default function MatchTable({ matches }: Props) {
                     matchId={match.id}
                     initialMinutes={match.emreStats?.minutesPlayed ?? null}
                     matchLength={match.teamMatchLength}
+                    onSaved={onMinutesSaved}
                   />
                 ) : (
                   <span className="text-gray-300 text-sm">–</span>

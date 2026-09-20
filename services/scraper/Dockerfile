@@ -1,9 +1,13 @@
-FROM mcr.microsoft.com/playwright:v1.59.1-jammy
+FROM node:20-slim
+
+# Prisma's query engine needs OpenSSL, which the slim base image omits.
+RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Copy root package files
-COPY package.json ./
+# Copy root package files (lockfile keeps installs reproducible)
+COPY package.json package-lock.json ./
 COPY prisma/ ./prisma/
 
 # Copy scraper package files

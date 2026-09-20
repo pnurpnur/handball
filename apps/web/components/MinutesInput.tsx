@@ -6,11 +6,12 @@ interface Props {
   matchId: string;
   initialMinutes: number | null;
   matchLength: number | null;
+  onSaved?: (matchId: string, value: number | null) => void;
 }
 
 type SaveState = "idle" | "saving" | "error";
 
-export default function MinutesInput({ matchId, initialMinutes, matchLength }: Props) {
+export default function MinutesInput({ matchId, initialMinutes, matchLength, onSaved }: Props) {
   const [minutes, setMinutes] = useState<number | null>(initialMinutes);
   const [saveState, setSaveState] = useState<SaveState>("idle");
 
@@ -24,6 +25,7 @@ export default function MinutesInput({ matchId, initialMinutes, matchLength }: P
       });
       if (!res.ok) throw new Error("save failed");
       setSaveState("idle");
+      onSaved?.(matchId, value);
     } catch {
       setSaveState("error");
     }

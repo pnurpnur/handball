@@ -3,6 +3,10 @@ import { CronJob } from "cron";
 import { scrapeAll, scrapeTeam } from "./scraper";
 import { prisma } from "./db";
 import { TEAM_IDS } from "./config";
+import { formatError } from "./util";
+
+const logError = (label: string) => (err: unknown) =>
+  console.error(`${label}: ${formatError(err)}`);
 
 const args = process.argv.slice(2);
 const runOnce = args.includes("--once");
@@ -10,6 +14,12 @@ const teamArg = args.find((a) => a.startsWith("--team="));
 
 /** Active post-match scrape timers, keyed by scheduled time (ms since epoch). */
 const scheduledTimers = new Map<number, ReturnType<typeof setTimeout>>();
+
+// Node's setTimeout overflows a 32-bit signed int (~24.8 days) and silently
+// fires almost immediately instead of waiting — cap how far out we'll set a
+// concrete timer. Anything further out gets picked up once it falls inside
+// this window, via the daily 08:00 cron re-running scheduleMatchScrapes().
+const MAX_TIMER_DELAY_MS = 20 * 24 * 60 * 60 * 1000; // 20 days
 
 /**
  * Schedule scrapes 2 hours after each upcoming match starts.
@@ -49,18 +59,23 @@ async function scheduleMatchScrapes(): Promise<void> {
   }
 
   let scheduled = 0;
+  let deferred = 0;
   for (const scrapeAt of scrapeTimes) {
     const delay = scrapeAt - Date.now();
     if (delay <= 0) continue; // Already passed
+    if (delay > MAX_TIMER_DELAY_MS) {
+      deferred++;
+      continue; // Too far out for setTimeout; the daily cron will pick it up later
+    }
 
     const timer = setTimeout(async () => {
       scheduledTimers.delete(scrapeAt);
       console.log(
         `[Scheduler] Post-match scrape triggered (scheduled for ${new Date(scrapeAt).toISOString()})`
       );
-      await scrapeAll().catch(console.error);
+      await scrapeAll().catch(logError("[Scheduler] scrapeAll failed"));
       // Reschedule for any new matches added since last run
-      await scheduleMatchScrapes().catch(console.error);
+      await scheduleMatchScrapes().catch(logError("[Scheduler] scheduleMatchScrapes failed"));
     }, delay);
 
     scheduledTimers.set(scrapeAt, timer);
@@ -71,7 +86,9 @@ async function scheduleMatchScrapes(): Promise<void> {
   }
 
   console.log(
-    `[Scheduler] ${scheduled} post-match scrape(s) scheduled from ${upcoming.length} upcoming matches.`
+    `[Scheduler] ${scheduled} post-match scrape(s) scheduled from ${upcoming.length} upcoming matches` +
+      (deferred > 0 ? ` (${deferred} more than 20 days out, deferred to the daily cron)` : "") +
+      "."
   );
 }
 
@@ -99,8 +116,8 @@ async function main() {
     "0 8 * * *",
     async () => {
       console.log("[Cron] Morning scrape...");
-      await scrapeAll().catch(console.error);
-      await scheduleMatchScrapes().catch(console.error);
+      await scrapeAll().catch(logError("[Cron] scrapeAll failed"));
+      await scheduleMatchScrapes().catch(logError("[Cron] scheduleMatchScrapes failed"));
     },
     null,
     true,
@@ -129,11 +146,11 @@ async function main() {
       res.end(JSON.stringify({ ok: true }));
 
       if (teamId && TEAM_IDS.includes(teamId)) {
-        scrapeTeam(teamId).catch(console.error);
+        scrapeTeam(teamId).catch(logError(`[Webhook] scrapeTeam(${teamId}) failed`));
       } else {
         scrapeAll()
           .then(() => scheduleMatchScrapes())
-          .catch(console.error);
+          .catch(logError("[Webhook] scrapeAll failed"));
       }
       return;
     }
@@ -165,7 +182,7 @@ async function main() {
     console.log("[Scraper] Initial scrape on startup (background)...");
     scrapeAll()
       .then(() => scheduleMatchScrapes())
-      .catch(console.error);
+      .catch(logError("[Startup] scrapeAll failed"));
   });
 
   process.on("SIGTERM", async () => {
@@ -178,6 +195,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error("[Scraper] Fatal error:", err);
+  console.error(`[Scraper] Fatal error: ${formatError(err)}`);
   process.exit(1);
 });

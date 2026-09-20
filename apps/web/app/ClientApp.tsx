@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import type { MatchData, StatsResponse, TeamData, SeasonData, TeamStats } from "@/lib/types";
 import MatchCard from "@/components/MatchCard";
 import MatchTable from "@/components/MatchTable";
@@ -132,14 +132,30 @@ export default function ClientApp({ initialMatches, teams, seasons }: Props) {
   const [tab, setTab] = useState<Tab>("kamper");
   const [teamFilter, setTeamFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [sortKey, setSortKey] = useState<SortKey>("date_desc");
-  const [viewMode, setViewMode] = useState<ViewMode>("table");
+  const [sortKey, setSortKey] = useState<SortKey>("date_asc");
+  const [viewMode, setViewMode] = useState<ViewMode>("cards");
   const [selectedSeason, setSelectedSeason] = useState<number>(seasons[0]?.id ?? 1);
 
-  // All matches for the selected season
+  // Minutes just saved by the user, keyed by match id. The homepage is
+  // ISR-cached for 5 minutes, so a fresh save wouldn't show up here until
+  // that expires — apply it locally so switching table/card view (which
+  // remounts the input with server-provided data) doesn't lose it.
+  const [minutesOverrides, setMinutesOverrides] = useState<Record<string, number | null>>({});
+  const handleMinutesSaved = useCallback((matchId: string, value: number | null) => {
+    setMinutesOverrides((prev) => ({ ...prev, [matchId]: value }));
+  }, []);
+
+  // All matches for the selected season, with any local minutes override applied
   const seasonMatches = useMemo(
-    () => initialMatches.filter((m) => m.seasonId === selectedSeason),
-    [initialMatches, selectedSeason]
+    () =>
+      initialMatches
+        .filter((m) => m.seasonId === selectedSeason)
+        .map((m) =>
+          m.id in minutesOverrides && m.emreStats
+            ? { ...m, emreStats: { ...m.emreStats, minutesPlayed: minutesOverrides[m.id] } }
+            : m
+        ),
+    [initialMatches, selectedSeason, minutesOverrides]
   );
 
   // Teams that have at least one match in the selected season (preserving TEAM_ORDER sort)
@@ -178,6 +194,29 @@ export default function ClientApp({ initialMatches, teams, seasons }: Props) {
       }
     });
   }, [seasonMatches, teamFilter, statusFilter, sortKey]);
+
+  // On first load, jump to the most recently played match instead of
+  // leaving the user at the top of the season (August). Runs once.
+  const hasAutoScrolledRef = useRef(false);
+  useEffect(() => {
+    if (hasAutoScrolledRef.current) return;
+    if (tab !== "kamper" || filteredMatches.length === 0) return;
+
+    const lastPlayed = [...filteredMatches].reverse().find((m) => m.isPlayed);
+    if (!lastPlayed) return;
+    hasAutoScrolledRef.current = true;
+
+    requestAnimationFrame(() => {
+      const candidates = document.querySelectorAll(`[data-match-id="${lastPlayed.id}"]`);
+      for (const node of Array.from(candidates)) {
+        const el = node as HTMLElement;
+        if (el.offsetParent !== null) {
+          el.scrollIntoView({ block: "center", behavior: "auto" });
+          break;
+        }
+      }
+    });
+  }, [tab, filteredMatches]);
 
   const totalMatches = filteredMatches.length;
   const playedCount = filteredMatches.filter((m) => m.isPlayed).length;
@@ -297,14 +336,16 @@ export default function ClientApp({ initialMatches, teams, seasons }: Props) {
                   Ingen kamper funnet
                 </p>
               ) : (
-                filteredMatches.map((m) => <MatchCard key={m.id} match={m} />)
+                filteredMatches.map((m) => (
+                  <MatchCard key={m.id} match={m} />
+                ))
               )}
             </div>
 
             {/* Desktop: table or cards */}
             <div className="hidden sm:block">
               {viewMode === "table" ? (
-                <MatchTable matches={filteredMatches} />
+                <MatchTable matches={filteredMatches} onMinutesSaved={handleMinutesSaved} />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {filteredMatches.length === 0 ? (
@@ -312,7 +353,9 @@ export default function ClientApp({ initialMatches, teams, seasons }: Props) {
                       Ingen kamper funnet
                     </p>
                   ) : (
-                    filteredMatches.map((m) => <MatchCard key={m.id} match={m} />)
+                    filteredMatches.map((m) => (
+                      <MatchCard key={m.id} match={m} />
+                    ))
                   )}
                 </div>
               )}

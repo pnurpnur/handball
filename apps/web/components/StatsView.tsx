@@ -300,7 +300,7 @@ export default function StatsView({ stats, matches }: Props) {
               {
                 label: "Målhyppighet",
                 total: stats.emre.totalGoals > 0
-                  ? `${Math.round((stats.emre.minutesPossible / stats.emre.totalGoals) * 10) / 10}`
+                  ? `${Math.round((stats.emre.minutesPlayed / stats.emre.totalGoals) * 10) / 10}`
                   : "–",
                 sub: stats.emre.totalGoals > 0 ? "min per mål" : null,
                 color: "bg-purple-50 text-purple-700",
@@ -341,7 +341,7 @@ export default function StatsView({ stats, matches }: Props) {
               variant="withEmre"
               emreGoals={stats.combined.emreGoals}
               emreAvgGoals={stats.combined.emreAvgGoals}
-              emreGoalFrequency={stats.combined.emreGoals > 0 ? Math.round((stats.combined.minutesPossible / stats.combined.emreGoals) * 10) / 10 : null}
+              emreGoalFrequency={stats.combined.emreGoals > 0 ? Math.round((stats.combined.minutesPlayed / stats.combined.emreGoals) * 10) / 10 : null}
               minutesPct={stats.combined.minutesPct}
               minutesPlayed={stats.combined.minutesPlayed}
               minutesPossible={stats.combined.minutesPossible}
@@ -391,7 +391,7 @@ export default function StatsView({ stats, matches }: Props) {
                   variant="withEmre"
                   emreGoals={teamStats.emreGoals}
                   emreAvgGoals={teamStats.emreAvgGoals}
-                  emreGoalFrequency={teamStats.emreGoals > 0 ? Math.round((teamStats.minutesPossible / teamStats.emreGoals) * 10) / 10 : null}
+                  emreGoalFrequency={teamStats.emreGoals > 0 ? Math.round((teamStats.minutesPlayed / teamStats.emreGoals) * 10) / 10 : null}
                   minutesPct={teamStats.minutesPct}
                   minutesPlayed={teamStats.minutesPlayed}
                   minutesPossible={teamStats.minutesPossible}

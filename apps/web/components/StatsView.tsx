@@ -273,7 +273,7 @@ export default function StatsView({ stats, matches }: Props) {
           ⚡ Emres statistikk
         </h2>
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
             {[
               {
                 label: "Kamper",
@@ -304,12 +304,6 @@ export default function StatsView({ stats, matches }: Props) {
                   : "–",
                 sub: stats.emre.totalGoals > 0 ? "min per mål" : null,
                 color: "bg-purple-50 text-purple-700",
-              },
-              {
-                label: "Røde kort",
-                total: stats.emre.totalRedCards,
-                sub: stats.emre.totalRedCards > 0 ? `${stats.emre.totalRedCards} totalt` : "ingen",
-                color: "bg-red-50 text-red-700",
               },
             ].map(({ label, total, sub, color }) => (
               <div key={label} className={`rounded-xl p-3 text-center ${color}`}>

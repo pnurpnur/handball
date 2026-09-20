@@ -4,7 +4,7 @@ import type { MatchData, TeamData, SeasonData } from "@/lib/types";
 
 export const revalidate = 300; // Revalidate every 5 minutes (ISR)
 
-const TEAM_ORDER = [698373, 771912, 682520, 709787, 928241];
+const TEAM_ORDER = [698373, 771912, 682520, 709787, 928241, 206064];
 
 async function getSeasons(): Promise<SeasonData[]> {
   return prisma.season.findMany({ orderBy: { id: "desc" } });

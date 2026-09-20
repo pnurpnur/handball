@@ -157,6 +157,7 @@ function TeamStatsBlock({
   variant = "total",
   emreGoals,
   emreAvgGoals,
+  emreGoalFrequency,
   minutesPct,
   minutesPlayed,
   minutesPossible,
@@ -168,6 +169,7 @@ function TeamStatsBlock({
   variant?: "total" | "withEmre" | "withoutEmre";
   emreGoals?: number;
   emreAvgGoals?: number;
+  emreGoalFrequency?: number | null;
   minutesPct?: number | null;
   minutesPlayed?: number;
   minutesPossible?: number;
@@ -204,7 +206,7 @@ function TeamStatsBlock({
             </div>
           ))}
         </div>
-        <StatRow label="Kamper" value={stats.played} />
+        {variant !== "withEmre" && <StatRow label="Kamper" value={stats.played} />}
         <StatRow label="Seiersprosent" value={`${winPct}%`} highlight="blue" />
         {variant === "total" && (
           <>
@@ -224,6 +226,14 @@ function TeamStatsBlock({
             label="Mål Emre"
             value={emreGoals}
             sub={`${emreAvgGoals} snitt`}
+            highlight="green"
+          />
+        )}
+        {variant === "withEmre" && emreGoalFrequency !== null && emreGoalFrequency !== undefined && (
+          <StatRow
+            label="Målhyppighet"
+            value={emreGoalFrequency}
+            sub="min per mål"
             highlight="green"
           />
         )}
@@ -288,16 +298,18 @@ export default function StatsView({ stats, matches }: Props) {
                 color: "bg-emerald-50 text-emerald-700",
               },
               {
-                label: "Gule",
-                total: stats.emre.totalYellowCards,
-                sub: `${stats.emre.avgYellowCards} snitt`,
-                color: "bg-yellow-50 text-yellow-700",
+                label: "Målhyppighet",
+                total: stats.emre.totalGoals > 0
+                  ? `${Math.round((stats.emre.minutesPossible / stats.emre.totalGoals) * 10) / 10}`
+                  : "–",
+                sub: stats.emre.totalGoals > 0 ? "min per mål" : null,
+                color: "bg-purple-50 text-purple-700",
               },
               {
-                label: "2 min",
-                total: stats.emre.totalTwoMinutes,
-                sub: `${stats.emre.avgTwoMinutes} snitt`,
-                color: "bg-orange-50 text-orange-700",
+                label: "Røde kort",
+                total: stats.emre.totalRedCards,
+                sub: stats.emre.totalRedCards > 0 ? `${stats.emre.totalRedCards} totalt` : "ingen",
+                color: "bg-red-50 text-red-700",
               },
             ].map(({ label, total, sub, color }) => (
               <div key={label} className={`rounded-xl p-3 text-center ${color}`}>
@@ -335,6 +347,7 @@ export default function StatsView({ stats, matches }: Props) {
               variant="withEmre"
               emreGoals={stats.combined.emreGoals}
               emreAvgGoals={stats.combined.emreAvgGoals}
+              emreGoalFrequency={stats.combined.emreGoals > 0 ? Math.round((stats.combined.minutesPossible / stats.combined.emreGoals) * 10) / 10 : null}
               minutesPct={stats.combined.minutesPct}
               minutesPlayed={stats.combined.minutesPlayed}
               minutesPossible={stats.combined.minutesPossible}
@@ -384,6 +397,7 @@ export default function StatsView({ stats, matches }: Props) {
                   variant="withEmre"
                   emreGoals={teamStats.emreGoals}
                   emreAvgGoals={teamStats.emreAvgGoals}
+                  emreGoalFrequency={teamStats.emreGoals > 0 ? Math.round((teamStats.minutesPossible / teamStats.emreGoals) * 10) / 10 : null}
                   minutesPct={teamStats.minutesPct}
                   minutesPlayed={teamStats.minutesPlayed}
                   minutesPossible={teamStats.minutesPossible}

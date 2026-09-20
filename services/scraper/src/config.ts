@@ -7,6 +7,7 @@ export const TEAM_CONFIG: Record<number, { matchLength: number }> = {
   698373: { matchLength: 60 }, // Tiller 2 senior
   682520: { matchLength: 50 }, // Tiller G18
   709787: { matchLength: 50 }, // Tiller G20
+  206064: { matchLength: 60 }, // Tiller senior men
 };
 export const TEAM_IDS = Object.keys(TEAM_CONFIG).map(Number);
 

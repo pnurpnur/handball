@@ -359,11 +359,12 @@ export default function StatsView({ stats, matches }: Props) {
         if (!teamStats) return null;
         const teamMatches = playedMatches.filter((m) => m.teamId === team.id);
         const isExpanded = expandedTeams.has(team.id);
+        const displayName = team.shortName || team.name;
 
         return (
           <section key={team.id}>
             <h2 className="text-base font-bold text-gray-800 mb-3">
-              🤾 {team.name}
+              🤾 {displayName}
             </h2>
             <div className="flex gap-3 items-stretch">
               <div className="flex-1">

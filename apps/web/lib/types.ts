@@ -6,6 +6,7 @@ export interface SeasonData {
 export interface TeamData {
   id: number;
   name: string;
+  shortName?: string | null;
   matchLengthMinutes?: number | null;
 }
 

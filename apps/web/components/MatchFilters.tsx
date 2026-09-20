@@ -32,7 +32,7 @@ export default function MatchFilters({
         <option value="all">Alle lag</option>
         {teams.map((t) => (
           <option key={t.id} value={String(t.id)}>
-            {t.name}
+            {t.shortName || t.name}
           </option>
         ))}
       </select>

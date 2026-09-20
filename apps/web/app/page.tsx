@@ -12,7 +12,7 @@ async function getSeasons(): Promise<SeasonData[]> {
 
 async function getTeams(): Promise<TeamData[]> {
   const teams = await prisma.team.findMany({
-    select: { id: true, name: true, matchLengthMinutes: true },
+    select: { id: true, name: true, shortName: true, matchLengthMinutes: true },
   });
   return teams.sort((a, b) => {
     const ai = TEAM_ORDER.indexOf(a.id);

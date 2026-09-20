@@ -6,12 +6,13 @@ export const CURRENT_SEASON_NAME = "2026/2027";
 export const HANDBALL_SEASON_ID = 201068;
 
 // Update each season (Emre's teams). matchLength = full match length in
-// minutes, used to calculate Emre's playing-time percentage.
-export const TEAM_CONFIG: Record<number, { matchLength: number }> = {
-  698373: { matchLength: 60 }, // Tiller 2 senior
-  682520: { matchLength: 50 }, // Tiller G18
-  709787: { matchLength: 50 }, // Tiller G20
-  206064: { matchLength: 60 }, // Tiller senior men
+// minutes, used to calculate Emre's playing-time percentage. displayName
+// is shown on the stats page to distinguish between teams with similar names.
+export const TEAM_CONFIG: Record<number, { matchLength: number; displayName?: string }> = {
+  698373: { matchLength: 60, displayName: "Tiller 2 senior" }, // Tiller 2 senior
+  682520: { matchLength: 50, displayName: "Tiller G18" }, // Tiller G18
+  709787: { matchLength: 50, displayName: "Tiller G20" }, // Tiller G20
+  206064: { matchLength: 60, displayName: "Tiller senior menn" }, // Tiller senior men
 };
 export const TEAM_IDS = Object.keys(TEAM_CONFIG).map(Number);
 

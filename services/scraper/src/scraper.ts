@@ -334,10 +334,11 @@ export async function scrapeTeam(teamId: number): Promise<number> {
     const { teamName, matches } = await fetchTeamMatches(teamId);
     const matchLength = TEAM_CONFIG[teamId]?.matchLength;
 
+    const displayName = TEAM_CONFIG[teamId]?.displayName;
     await prisma.team.upsert({
       where: { id: teamId },
-      update: { name: teamName, matchLengthMinutes: matchLength, updatedAt: new Date() },
-      create: { id: teamId, name: teamName, matchLengthMinutes: matchLength },
+      update: { name: teamName, shortName: displayName, matchLengthMinutes: matchLength, updatedAt: new Date() },
+      create: { id: teamId, name: teamName, shortName: displayName, matchLengthMinutes: matchLength },
     });
 
     for (const match of matches) {

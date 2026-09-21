@@ -1,6 +1,7 @@
 "use client";
 
 import type { MatchData } from "@/lib/types";
+import { getTeamColors } from "@/lib/teamColors";
 
 interface Props {
   match: MatchData;
@@ -29,7 +30,7 @@ function formatTime(iso: string | null): string {
 function ResultBadge({ match }: { match: MatchData }) {
   if (!match.isPlayed || match.homeScore === null || match.awayScore === null) {
     return (
-      <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded">
+      <span className="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded font-medium">
         Ikke spilt
       </span>
     );
@@ -57,6 +58,11 @@ function ResultBadge({ match }: { match: MatchData }) {
 export default function MatchCard({ match }: Props) {
   const time = formatTime(match.date);
   const hnUrl = `https://www.handball.no/system/kamper/kamp/?matchid=${match.id}`;
+  const teamColors = getTeamColors(match.teamId, match.teamName);
+
+  const bgClass = match.isPlayed
+    ? "bg-green-50 border-green-100 hover:border-green-200"
+    : "bg-gray-50 border-gray-100 hover:border-gray-200";
 
   return (
     <a
@@ -64,7 +70,7 @@ export default function MatchCard({ match }: Props) {
       target="_blank"
       rel="noopener noreferrer"
       data-match-id={match.id}
-      className="block bg-white rounded-xl shadow-sm border border-gray-100 p-4 space-y-3 hover:border-sky-200 hover:shadow-md transition-all"
+      className={`block rounded-xl shadow-sm border p-4 space-y-3 hover:shadow-md transition-all ${bgClass}`}
     >
       {/* Header: date + team + tournament */}
       <div className="flex items-start justify-between gap-2">
@@ -73,9 +79,11 @@ export default function MatchCard({ match }: Props) {
             {formatDate(match.date)}
             {time && <span> · {time}</span>}
           </p>
-          <p className="text-xs text-sky-600 font-medium mt-0.5">{match.tournament}</p>
+          <p className={`text-xs font-medium mt-0.5 ${match.isPlayed ? "text-green-700" : "text-gray-600"}`}>
+            {match.tournament}
+          </p>
         </div>
-        <span className="text-xs bg-sky-50 text-sky-700 border border-sky-200 px-2 py-0.5 rounded-full whitespace-nowrap shrink-0">
+        <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap shrink-0 border font-semibold ${teamColors.bgClass} ${teamColors.textClass} border-opacity-20`}>
           {match.teamName}
         </span>
       </div>
@@ -95,7 +103,7 @@ export default function MatchCard({ match }: Props) {
               <span>{match.awayScore}</span>
             </div>
           ) : (
-            <div className="text-sm text-gray-400 font-medium">vs</div>
+            <div className="text-sm text-gray-400 font-medium" />
           )}
           <ResultBadge match={match} />
         </div>

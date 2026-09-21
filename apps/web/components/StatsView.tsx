@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { MatchData, StatsResponse, TeamStats } from "@/lib/types";
+import { getTeamColors, TEAM_COLOR_MAP, TEAM_COLOR_MAP_BY_NAME } from "@/lib/teamColors";
 
 interface Props {
   stats: StatsResponse;
@@ -161,6 +162,7 @@ function TeamStatsBlock({
   minutesPct,
   minutesPlayed,
   minutesPossible,
+  teamId,
 }: {
   stats: TeamStats;
   label: string;
@@ -173,12 +175,22 @@ function TeamStatsBlock({
   minutesPct?: number | null;
   minutesPlayed?: number;
   minutesPossible?: number;
+  teamId?: number;
 }) {
-  const colors = {
-    blue: "bg-sky-600",
-    green: "bg-emerald-600",
-    gray: "bg-gray-500",
-  };
+  // Use team-specific color if teamId is provided and it's a known team
+  let headerClass = "bg-sky-600";
+  if (teamId && TEAM_COLOR_MAP[teamId]) {
+    headerClass = TEAM_COLOR_MAP[teamId].statsHeaderClass;
+  } else if (stats.teamName && TEAM_COLOR_MAP_BY_NAME[stats.teamName]) {
+    headerClass = TEAM_COLOR_MAP_BY_NAME[stats.teamName].statsHeaderClass;
+  } else {
+    const colors = {
+      blue: "bg-sky-600",
+      green: "bg-emerald-600",
+      gray: "bg-gray-500",
+    };
+    headerClass = colors[color];
+  }
 
   const winPct =
     stats.played > 0 ? Math.round((stats.won / stats.played) * 100) : 0;
@@ -189,10 +201,17 @@ function TeamStatsBlock({
     { label: "Tapt", value: stats.lost, color: "text-red-700 bg-red-50", matches: breakdown.lost },
   ];
 
+  let textColor = "text-white";
+  if (teamId && TEAM_COLOR_MAP[teamId] && TEAM_COLOR_MAP[teamId].statsColor === "white") {
+    textColor = "text-gray-900";
+  } else if (stats.teamName && TEAM_COLOR_MAP_BY_NAME[stats.teamName] && TEAM_COLOR_MAP_BY_NAME[stats.teamName].statsColor === "white") {
+    textColor = "text-gray-900";
+  }
+
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
-      <div className={`${colors[color]} px-4 py-2 rounded-t-xl`}>
-        <p className="text-white text-sm font-semibold">{label}</p>
+      <div className={`${headerClass} px-4 py-2 rounded-t-xl`}>
+        <p className={`${textColor} text-sm font-semibold`}>{label}</p>
       </div>
       <div className="p-3 space-y-0.5">
         <div className="grid grid-cols-3 gap-2 mb-3">
@@ -381,6 +400,7 @@ export default function StatsView({ stats, matches }: Props) {
                   color="blue"
                   variant="total"
                   breakdown={classifyMatches(teamMatches, teamStats.teamName)}
+                  teamId={team.id}
                 />
               </div>
               <div className="flex-1">
@@ -396,6 +416,7 @@ export default function StatsView({ stats, matches }: Props) {
                   minutesPlayed={teamStats.minutesPlayed}
                   minutesPossible={teamStats.minutesPossible}
                   breakdown={classifyMatches(teamMatches.filter((m) => m.emreInSquad), teamStats.teamName)}
+                  teamId={team.id}
                 />
               </div>
               <WithoutEmreToggle isExpanded={isExpanded} onToggle={() => toggleTeam(team.id)}>
@@ -405,6 +426,7 @@ export default function StatsView({ stats, matches }: Props) {
                   color="gray"
                   variant="withoutEmre"
                   breakdown={classifyMatches(teamMatches.filter((m) => !m.emreInSquad), teamStats.teamName)}
+                  teamId={team.id}
                 />
               </WithoutEmreToggle>
             </div>

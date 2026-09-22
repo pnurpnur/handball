@@ -74,10 +74,10 @@ export const TEAM_COLOR_MAP_BY_NAME: Record<string, {
     statsColor: "blue",
   },
   "Tiller": {
-    bgClass: "bg-blue-300",
-    textClass: "text-blue-900",
-    statsHeaderClass: "bg-blue-300",
-    statsColor: "light-blue",
+    bgClass: "bg-stone-200",
+    textClass: "text-stone-700",
+    statsHeaderClass: "bg-stone-200",
+    statsColor: "white",
   },
   "Tiller G20": {
     bgClass: "bg-stone-200",

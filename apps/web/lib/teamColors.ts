@@ -15,9 +15,9 @@ export const TEAM_COLOR_MAP_BY_ID: Record<number, {
   },
   682520: {
     name: "Tiller 2 senior",
-    bgClass: "bg-blue-600",
+    bgClass: "bg-purple-600",
     textClass: "text-white",
-    statsHeaderClass: "bg-blue-600",
+    statsHeaderClass: "bg-purple-600",
     statsColor: "blue",
   },
   709787: {
@@ -50,15 +50,15 @@ export const TEAM_COLOR_MAP_BY_NAME: Record<string, {
     statsColor: "deep-blue",
   },
   "Tiller 2 senior": {
-    bgClass: "bg-blue-600",
+    bgClass: "bg-purple-600",
     textClass: "text-white",
-    statsHeaderClass: "bg-blue-600",
+    statsHeaderClass: "bg-purple-600",
     statsColor: "blue",
   },
   "Tiller 2": {
-    bgClass: "bg-blue-600",
+    bgClass: "bg-purple-600",
     textClass: "text-white",
-    statsHeaderClass: "bg-blue-600",
+    statsHeaderClass: "bg-purple-600",
     statsColor: "blue",
   },
   "Tiller IL": {

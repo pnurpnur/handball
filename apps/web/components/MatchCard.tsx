@@ -58,7 +58,7 @@ function ResultBadge({ match }: { match: MatchData }) {
 export default function MatchCard({ match }: Props) {
   const time = formatTime(match.date);
   const hnUrl = `https://www.handball.no/system/kamper/kamp/?matchid=${match.id}`;
-  const teamColors = getTeamColors(match.teamId, match.teamName);
+  const teamColors = getTeamColors(match.teamId, match.teamName, match.tournament);
 
   const bgClass = match.isPlayed
     ? "bg-green-50 border-green-100 hover:border-green-200"

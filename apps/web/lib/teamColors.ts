@@ -29,9 +29,9 @@ export const TEAM_COLOR_MAP_BY_ID: Record<number, {
   },
   928241: {
     name: "Tiller G20",
-    bgClass: "bg-amber-100",
-    textClass: "text-amber-800",
-    statsHeaderClass: "bg-amber-100",
+    bgClass: "bg-stone-200",
+    textClass: "text-stone-700",
+    statsHeaderClass: "bg-stone-200",
     statsColor: "white",
   },
 };
@@ -80,9 +80,9 @@ export const TEAM_COLOR_MAP_BY_NAME: Record<string, {
     statsColor: "light-blue",
   },
   "Tiller G20": {
-    bgClass: "bg-amber-100",
-    textClass: "text-amber-800",
-    statsHeaderClass: "bg-amber-100",
+    bgClass: "bg-stone-200",
+    textClass: "text-stone-700",
+    statsHeaderClass: "bg-stone-200",
     statsColor: "white",
   },
 };

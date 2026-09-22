@@ -13,21 +13,21 @@ export const TEAM_COLOR_MAP_BY_ID: Record<number, {
     statsHeaderClass: "bg-blue-900",
     statsColor: "deep-blue",
   },
-  682520: {
+  698373: {
     name: "Tiller 2 senior",
     bgClass: "bg-blue-300",
     textClass: "text-blue-900",
     statsHeaderClass: "bg-blue-300",
     statsColor: "light-blue",
   },
-  709787: {
+  682520: {
     name: "Tiller G18",
     bgClass: "bg-purple-600",
     textClass: "text-white",
     statsHeaderClass: "bg-purple-600",
     statsColor: "blue",
   },
-  928241: {
+  709787: {
     name: "Tiller G20",
     bgClass: "bg-stone-200",
     textClass: "text-stone-700",

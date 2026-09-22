@@ -387,15 +387,40 @@ export default function StatsView({ stats, matches }: Props) {
         const isExpanded = expandedTeams.has(team.id);
         const displayName = team.shortName || team.name;
 
-        // Get team background color
+        // Get team background and header color
         let teamBgClass = "bg-white";
-        if (teamStats.teamName && TEAM_COLOR_MAP_BY_NAME[teamStats.teamName]) {
+        let teamHeaderColor: "blue" | "green" | "gray" = "blue";
+
+        if (team.id && TEAM_COLOR_MAP[team.id]) {
+          const teamColor = TEAM_COLOR_MAP[team.id];
+          if (teamColor.statsColor === "deep-blue") {
+            teamBgClass = "bg-blue-50";
+            teamHeaderColor = "blue";
+          } else if (teamColor.statsColor === "blue") {
+            teamBgClass = "bg-blue-50";
+            teamHeaderColor = "blue";
+          } else if (teamColor.statsColor === "light-blue") {
+            teamBgClass = "bg-blue-50";
+            teamHeaderColor = "blue";
+          } else if (teamColor.statsColor === "white") {
+            teamBgClass = "bg-amber-50";
+            teamHeaderColor = "blue";
+          }
+        } else if (teamStats.teamName && TEAM_COLOR_MAP_BY_NAME[teamStats.teamName]) {
           const teamColor = TEAM_COLOR_MAP_BY_NAME[teamStats.teamName];
-          // Create a light background version of the team color
-          if (teamColor.statsColor === "deep-blue") teamBgClass = "bg-blue-50";
-          else if (teamColor.statsColor === "blue") teamBgClass = "bg-blue-50";
-          else if (teamColor.statsColor === "light-blue") teamBgClass = "bg-blue-50";
-          else if (teamColor.statsColor === "white") teamBgClass = "bg-amber-50";
+          if (teamColor.statsColor === "deep-blue") {
+            teamBgClass = "bg-blue-50";
+            teamHeaderColor = "blue";
+          } else if (teamColor.statsColor === "blue") {
+            teamBgClass = "bg-blue-50";
+            teamHeaderColor = "blue";
+          } else if (teamColor.statsColor === "light-blue") {
+            teamBgClass = "bg-blue-50";
+            teamHeaderColor = "blue";
+          } else if (teamColor.statsColor === "white") {
+            teamBgClass = "bg-amber-50";
+            teamHeaderColor = "blue";
+          }
         }
 
         return (
@@ -408,7 +433,7 @@ export default function StatsView({ stats, matches }: Props) {
                 <TeamStatsBlock
                   stats={teamStats.overall}
                   label="Totalt"
-                  color="blue"
+                  color={teamHeaderColor}
                   variant="total"
                   breakdown={classifyMatches(teamMatches, teamStats.teamName)}
                   teamId={team.id}

@@ -6,7 +6,7 @@ export const TEAM_COLOR_MAP_BY_ID: Record<number, {
   statsHeaderClass: string;
   statsColor: "deep-blue" | "blue" | "light-blue" | "white";
 }> = {
-  771912: {
+  206064: {
     name: "Tiller senior menn",
     bgClass: "bg-blue-900",
     textClass: "text-white",
@@ -50,10 +50,10 @@ export const TEAM_COLOR_MAP_BY_NAME: Record<string, {
     statsColor: "deep-blue",
   },
   "Tiller 2 senior": {
-    bgClass: "bg-purple-600",
-    textClass: "text-white",
-    statsHeaderClass: "bg-purple-600",
-    statsColor: "blue",
+    bgClass: "bg-blue-300",
+    textClass: "text-blue-900",
+    statsHeaderClass: "bg-blue-300",
+    statsColor: "light-blue",
   },
   "Tiller 2": {
     bgClass: "bg-blue-300",

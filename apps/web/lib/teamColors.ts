@@ -27,7 +27,7 @@ export const TEAM_COLOR_MAP: Record<number, {
     bgClass: "bg-white",
     textClass: "text-blue-600",
     statsHeaderClass: "bg-white",
-    statsColor: "blue",
+    statsColor: "white",
   },
 };
 

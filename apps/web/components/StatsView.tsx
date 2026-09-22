@@ -387,8 +387,19 @@ export default function StatsView({ stats, matches }: Props) {
         const isExpanded = expandedTeams.has(team.id);
         const displayName = team.shortName || team.name;
 
+        // Get team background color
+        let teamBgClass = "bg-white";
+        if (teamStats.teamName && TEAM_COLOR_MAP_BY_NAME[teamStats.teamName]) {
+          const teamColor = TEAM_COLOR_MAP_BY_NAME[teamStats.teamName];
+          // Create a light background version of the team color
+          if (teamColor.statsColor === "deep-blue") teamBgClass = "bg-blue-50";
+          else if (teamColor.statsColor === "blue") teamBgClass = "bg-blue-50";
+          else if (teamColor.statsColor === "light-blue") teamBgClass = "bg-blue-50";
+          else if (teamColor.statsColor === "white") teamBgClass = "bg-amber-50";
+        }
+
         return (
-          <section key={team.id}>
+          <section key={team.id} className={`${teamBgClass} p-4 rounded-lg`}>
             <h2 className="text-base font-bold text-gray-800 mb-3">
               🤾 {displayName}
             </h2>

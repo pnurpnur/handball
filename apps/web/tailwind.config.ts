@@ -8,10 +8,12 @@ const config: Config = {
   ],
   safelist: [
     // Team colors
-    "bg-blue-900", "text-white", "bg-blue-600", "bg-blue-300", "text-blue-900", "bg-gray-100", "text-gray-800",
+    "bg-blue-900", "text-white", "bg-blue-600", "bg-blue-300", "text-blue-900", "bg-amber-100", "text-amber-800",
     // Match card backgrounds
     "bg-green-50", "border-green-100", "hover:border-green-200", "text-green-700",
     "bg-gray-50", "border-gray-100", "hover:border-gray-200", "text-gray-600",
+    // Stats section backgrounds
+    "bg-blue-50", "bg-amber-50",
   ],
   theme: {
     extend: {

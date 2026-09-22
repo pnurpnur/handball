@@ -13,7 +13,7 @@ const config: Config = {
     "bg-green-50", "border-green-100", "hover:border-green-200", "text-green-700",
     "bg-gray-50", "border-gray-100", "hover:border-gray-200", "text-gray-600",
     // Stats section backgrounds
-    "bg-blue-50", "bg-stone-50", "bg-slate-50", "bg-white",
+    "bg-blue-50", "bg-stone-50", "bg-slate-50", "bg-gray-100", "bg-white",
     // Stats color backgrounds
     "bg-blue-100", "bg-purple-100",
   ],

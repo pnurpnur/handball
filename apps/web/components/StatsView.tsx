@@ -380,7 +380,7 @@ export default function StatsView({ stats, matches }: Props) {
           if (teamColor.statsColor === "deep-blue") teamBgClass = "bg-blue-100";
           else if (teamColor.statsColor === "blue") teamBgClass = "bg-purple-100";
           else if (teamColor.statsColor === "light-blue") teamBgClass = "bg-blue-50";
-          else if (teamColor.statsColor === "white") teamBgClass = "bg-slate-50";
+          else if (teamColor.statsColor === "white") teamBgClass = "bg-gray-100";
         }
 
         return (

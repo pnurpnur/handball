@@ -177,20 +177,13 @@ function TeamStatsBlock({
   minutesPossible?: number;
   teamId?: number;
 }) {
-  // Use team-specific color if teamId is provided and it's a known team
-  let headerClass = "bg-sky-600";
-  if (teamId && TEAM_COLOR_MAP[teamId]) {
-    headerClass = TEAM_COLOR_MAP[teamId].statsHeaderClass;
-  } else if (stats.teamName && TEAM_COLOR_MAP_BY_NAME[stats.teamName]) {
-    headerClass = TEAM_COLOR_MAP_BY_NAME[stats.teamName].statsHeaderClass;
-  } else {
-    const colors = {
-      blue: "bg-sky-600",
-      green: "bg-emerald-600",
-      gray: "bg-gray-500",
-    };
-    headerClass = colors[color];
-  }
+  // Fixed header colors based on section type
+  const headerColors = {
+    blue: "bg-sky-600 text-white",
+    green: "bg-emerald-600 text-white",
+    gray: "bg-gray-500 text-white",
+  };
+  const headerClass = headerColors[color];
 
   const winPct =
     stats.played > 0 ? Math.round((stats.won / stats.played) * 100) : 0;
@@ -201,17 +194,10 @@ function TeamStatsBlock({
     { label: "Tapt", value: stats.lost, color: "text-red-700 bg-red-50", matches: breakdown.lost },
   ];
 
-  let textColor = "text-white";
-  if (teamId && TEAM_COLOR_MAP[teamId] && TEAM_COLOR_MAP[teamId].statsColor === "white") {
-    textColor = "text-gray-900";
-  } else if (stats.teamName && TEAM_COLOR_MAP_BY_NAME[stats.teamName] && TEAM_COLOR_MAP_BY_NAME[stats.teamName].statsColor === "white") {
-    textColor = "text-gray-900";
-  }
-
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
       <div className={`${headerClass} px-4 py-2 rounded-t-xl`}>
-        <p className={`${textColor} text-sm font-semibold`}>{label}</p>
+        <p className="text-sm font-semibold">{label}</p>
       </div>
       <div className="p-3 space-y-0.5">
         <div className="grid grid-cols-3 gap-2 mb-3">
@@ -387,15 +373,14 @@ export default function StatsView({ stats, matches }: Props) {
         const isExpanded = expandedTeams.has(team.id);
         const displayName = team.shortName || team.name;
 
-        // Get team background color
+        // Get team background color - muted/light version
         let teamBgClass = "bg-white";
         if (teamStats.teamName && TEAM_COLOR_MAP_BY_NAME[teamStats.teamName]) {
           const teamColor = TEAM_COLOR_MAP_BY_NAME[teamStats.teamName];
-          // Create a light background version of the team color
-          if (teamColor.statsColor === "deep-blue") teamBgClass = "bg-blue-50";
-          else if (teamColor.statsColor === "blue") teamBgClass = "bg-blue-50";
+          if (teamColor.statsColor === "deep-blue") teamBgClass = "bg-blue-100";
+          else if (teamColor.statsColor === "blue") teamBgClass = "bg-purple-100";
           else if (teamColor.statsColor === "light-blue") teamBgClass = "bg-blue-50";
-          else if (teamColor.statsColor === "white") teamBgClass = "bg-amber-50";
+          else if (teamColor.statsColor === "white") teamBgClass = "bg-slate-50";
         }
 
         return (

@@ -29,9 +29,9 @@ export const TEAM_COLOR_MAP_BY_ID: Record<number, {
   },
   928241: {
     name: "Tiller G20",
-    bgClass: "bg-gray-100",
-    textClass: "text-gray-800",
-    statsHeaderClass: "bg-gray-100",
+    bgClass: "bg-amber-100",
+    textClass: "text-amber-800",
+    statsHeaderClass: "bg-amber-100",
     statsColor: "white",
   },
 };

@@ -89,20 +89,15 @@ export const TEAM_COLOR_MAP_BY_NAME: Record<string, {
 
 export const TEAM_COLOR_MAP = TEAM_COLOR_MAP_BY_ID;
 
-export function getTeamColors(teamId: number, teamName?: string, tournament?: string) {
-  // Check tournament for G20 differentiation (Juniorserien Gutter = G20)
-  if (tournament && teamName === "Tiller" && tournament.includes("Juniorserien Gutter")) {
-    return TEAM_COLOR_MAP_BY_NAME["Tiller G20"];
-  }
-
-  // Try to get color by name first if provided
-  if (teamName && TEAM_COLOR_MAP_BY_NAME[teamName]) {
-    return TEAM_COLOR_MAP_BY_NAME[teamName];
-  }
-
-  // Fall back to ID-based lookup
+export function getTeamColors(teamId: number, teamName?: string) {
+  // Priority 1: Team ID lookup (most reliable)
   if (TEAM_COLOR_MAP[teamId]) {
     return TEAM_COLOR_MAP[teamId];
+  }
+
+  // Priority 2: Team name lookup
+  if (teamName && TEAM_COLOR_MAP_BY_NAME[teamName]) {
+    return TEAM_COLOR_MAP_BY_NAME[teamName];
   }
 
   // Default color

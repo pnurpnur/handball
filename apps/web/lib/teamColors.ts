@@ -92,23 +92,16 @@ export const TEAM_COLOR_MAP = TEAM_COLOR_MAP_BY_ID;
 export function getTeamColors(teamId: number, teamName?: string) {
   // Try to get color by name first if provided
   if (teamName && TEAM_COLOR_MAP_BY_NAME[teamName]) {
-    return {
-      name: teamName,
-      ...TEAM_COLOR_MAP_BY_NAME[teamName],
-    };
+    return TEAM_COLOR_MAP_BY_NAME[teamName];
   }
 
   // Fall back to ID-based lookup
   if (TEAM_COLOR_MAP[teamId]) {
-    return {
-      name: TEAM_COLOR_MAP[teamId].name,
-      ...TEAM_COLOR_MAP[teamId],
-    };
+    return TEAM_COLOR_MAP[teamId];
   }
 
   // Default color
   return {
-    name: "",
     bgClass: "bg-sky-50",
     textClass: "text-sky-700",
     statsHeaderClass: "bg-sky-600",

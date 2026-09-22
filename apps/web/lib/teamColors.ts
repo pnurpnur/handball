@@ -15,17 +15,17 @@ export const TEAM_COLOR_MAP_BY_ID: Record<number, {
   },
   682520: {
     name: "Tiller 2 senior",
-    bgClass: "bg-purple-600",
-    textClass: "text-white",
-    statsHeaderClass: "bg-purple-600",
-    statsColor: "blue",
-  },
-  709787: {
-    name: "Tiller G18",
     bgClass: "bg-blue-300",
     textClass: "text-blue-900",
     statsHeaderClass: "bg-blue-300",
     statsColor: "light-blue",
+  },
+  709787: {
+    name: "Tiller G18",
+    bgClass: "bg-purple-600",
+    textClass: "text-white",
+    statsHeaderClass: "bg-purple-600",
+    statsColor: "blue",
   },
   928241: {
     name: "Tiller G20",
@@ -56,10 +56,10 @@ export const TEAM_COLOR_MAP_BY_NAME: Record<string, {
     statsColor: "blue",
   },
   "Tiller 2": {
-    bgClass: "bg-purple-600",
-    textClass: "text-white",
-    statsHeaderClass: "bg-purple-600",
-    statsColor: "blue",
+    bgClass: "bg-blue-300",
+    textClass: "text-blue-900",
+    statsHeaderClass: "bg-blue-300",
+    statsColor: "light-blue",
   },
   "Tiller IL": {
     bgClass: "bg-blue-900",
@@ -68,10 +68,10 @@ export const TEAM_COLOR_MAP_BY_NAME: Record<string, {
     statsColor: "deep-blue",
   },
   "Tiller G18": {
-    bgClass: "bg-blue-300",
-    textClass: "text-blue-900",
-    statsHeaderClass: "bg-blue-300",
-    statsColor: "light-blue",
+    bgClass: "bg-purple-600",
+    textClass: "text-white",
+    statsHeaderClass: "bg-purple-600",
+    statsColor: "blue",
   },
   "Tiller": {
     bgClass: "bg-blue-300",

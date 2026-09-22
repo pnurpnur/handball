@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { MatchData, StatsResponse, TeamStats } from "@/lib/types";
-import { getTeamColors, TEAM_COLOR_MAP, TEAM_COLOR_MAP_BY_NAME } from "@/lib/teamColors";
+import { getTeamColors, TEAM_COLOR_MAP } from "@/lib/teamColors";
 
 interface Props {
   stats: StatsResponse;

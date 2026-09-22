@@ -153,32 +153,45 @@ async function fetchTeamMatches(teamId: number): Promise<{
   if (!data) throw lastErr;
 
   let teamName = `Team ${teamId}`;
-  const matches: MatchRow[] = (data.matches ?? []).map((m) => {
-    const homeTeam = m.homeTeamName.trim();
-    const awayTeam = m.awayTeamName.trim();
+  const matches: MatchRow[] = [];
+  for (const m of data.matches ?? []) {
+    // A single malformed fixture (e.g. kickoff time not yet confirmed by
+    // handball.no, so matchStartTime/matchDate come back null) must not
+    // abort the whole batch via a thrown error — that would silently drop
+    // every other match for this team for the entire run, every run,
+    // until the bad entry is fixed upstream. Skip just that one instead.
+    try {
+      const homeTeam = m.homeTeamName.trim();
+      const awayTeam = m.awayTeamName.trim();
 
-    if (m.homeTeamId === teamId) teamName = homeTeam;
-    else if (m.awayTeamId === teamId) teamName = awayTeam;
+      if (m.homeTeamId === teamId) teamName = homeTeam;
+      else if (m.awayTeamId === teamId) teamName = awayTeam;
 
-    const [year, month, day] = m.matchDate.split("T")[0].split("-").map(Number);
-    const hour = Math.floor(m.matchStartTime / 100);
-    const minute = m.matchStartTime % 100;
-    const date = osloLocalToUtcDate(year, month, day, hour, minute);
+      const [year, month, day] = m.matchDate.split("T")[0].split("-").map(Number);
+      const startTime = m.matchStartTime ?? 0;
+      const hour = Math.floor(startTime / 100);
+      const minute = startTime % 100;
+      const date = osloLocalToUtcDate(year, month, day, hour, minute);
 
-    const isPlayed = m.goalsHome !== null && m.goalsAway !== null;
+      const isPlayed = m.goalsHome !== null && m.goalsAway !== null;
 
-    return {
-      matchId: String(m.matchId),
-      date,
-      homeTeam,
-      awayTeam,
-      homeScore: m.goalsHome,
-      awayScore: m.goalsAway,
-      isPlayed,
-      tournament: m.tournamentName,
-      venue: m.venueUnitName,
-    };
-  });
+      matches.push({
+        matchId: String(m.matchId),
+        date,
+        homeTeam,
+        awayTeam,
+        homeScore: m.goalsHome,
+        awayScore: m.goalsAway,
+        isPlayed,
+        tournament: m.tournamentName,
+        venue: m.venueUnitName,
+      });
+    } catch (err) {
+      console.error(
+        `  Skipping malformed fixture entry for team ${teamId} (matchId=${m?.matchId}): ${formatError(err)}`
+      );
+    }
+  }
 
   console.log(
     `  "${teamName}": found ${matches.length} matches (${matches.filter((m) => m.isPlayed).length} played)`

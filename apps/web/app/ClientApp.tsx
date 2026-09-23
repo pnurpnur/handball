@@ -276,7 +276,7 @@ export default function ClientApp({ initialMatches, teams, seasons }: Props) {
 
       {/* Sticky filter bar – only visible on kamper tab */}
       {tab === "kamper" && (
-        <div className="sticky top-[106px] z-10 bg-gray-50 border-b border-gray-200">
+        <div className="sticky top-[105px] z-10 bg-gray-50 border-b border-gray-200">
           <div className="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
             <MatchFilters
               teams={seasonTeams}

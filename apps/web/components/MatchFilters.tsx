@@ -47,18 +47,18 @@ export default function MatchFilters({
         <option value="date_desc">Dato ↓</option>
         <option value="date_asc">Dato ↑</option>
         <option value="goals_desc">Emre mål ↓</option>
-        <option value="margin_desc">Seiersmargin ↓</option>
-        <option value="margin_asc">Seiersmargin ↑</option>
+        <option value="margin_desc">Beste resultat</option>
+        <option value="margin_asc">Dårligste resultat</option>
       </select>
 
       {/* Status filter */}
-      <div className="flex rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+      <div className="flex rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden divide-x divide-gray-200">
         {[
           { value: "all", label: "Alle" },
-          { value: "played", label: "Spilt" },
-          { value: "upcoming", label: "Ikke spilt" },
-          { value: "participated", label: "Deltatt" },
-          { value: "not-participated", label: "Ikke deltatt" },
+          { value: "played", label: "Ferdige" },
+          { value: "upcoming", label: "Kommende" },
+          { value: "participated", label: "Emre" },
+          { value: "not-participated", label: "Uten" },
         ].map(({ value, label }) => (
           <button
             key={value}

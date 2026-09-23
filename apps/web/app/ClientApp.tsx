@@ -233,7 +233,8 @@ export default function ClientApp({ initialMatches, teams, seasons }: Props) {
               <span className="text-2xl">🤾</span>
               <div>
                 <h1 className="text-lg font-bold leading-tight">
-                  Emre Askim Pettersen
+                  <span className="sm:hidden">Emre</span>
+                  <span className="hidden sm:inline">Emre Askim Pettersen</span>
                 </h1>
               </div>
             </div>

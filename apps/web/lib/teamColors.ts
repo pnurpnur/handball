@@ -47,5 +47,6 @@ export function getTeamColors(teamId: number) {
     textClass: "text-sky-700",
     statsHeaderClass: "bg-sky-600",
     statsColor: "blue" as const,
+    displayName: "Team",
   };
 }

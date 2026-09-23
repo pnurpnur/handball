@@ -274,47 +274,51 @@ export default function ClientApp({ initialMatches, teams, seasons }: Props) {
         </div>
       </header>
 
+      {/* Sticky filter bar – only visible on kamper tab */}
+      {tab === "kamper" && (
+        <div className="sticky top-[106px] z-10 bg-gray-50 border-b border-gray-200">
+          <div className="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <MatchFilters
+              teams={seasonTeams}
+              selectedTeam={teamFilter}
+              selectedStatus={statusFilter}
+              sortKey={sortKey}
+              onTeamChange={setTeamFilter}
+              onStatusChange={setStatusFilter}
+              onSortChange={(v) => setSortKey(v as SortKey)}
+            />
+
+            {/* View mode toggle (hidden on mobile – always cards) */}
+            <div className="hidden sm:flex rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+              <button
+                onClick={() => setViewMode("table")}
+                className={`px-3 py-2 text-xs font-medium transition-colors ${
+                  viewMode === "table"
+                    ? "bg-sky-600 text-white"
+                    : "text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                ☰ Tabell
+              </button>
+              <button
+                onClick={() => setViewMode("cards")}
+                className={`px-3 py-2 text-xs font-medium transition-colors ${
+                  viewMode === "cards"
+                    ? "bg-sky-600 text-white"
+                    : "text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                ⊞ Kort
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Content */}
       <main className="max-w-5xl mx-auto px-4 py-5">
         {tab === "kamper" ? (
           <div className="space-y-4">
-            {/* Filters + view toggle */}
-            <div className="sticky top-[117px] z-10 bg-gray-50 -mx-4 px-4 py-3 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3">
-              <MatchFilters
-                teams={seasonTeams}
-                selectedTeam={teamFilter}
-                selectedStatus={statusFilter}
-                sortKey={sortKey}
-                onTeamChange={setTeamFilter}
-                onStatusChange={setStatusFilter}
-                onSortChange={(v) => setSortKey(v as SortKey)}
-              />
-
-              {/* View mode toggle (hidden on mobile – always cards) */}
-              <div className="hidden sm:flex rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
-                <button
-                  onClick={() => setViewMode("table")}
-                  className={`px-3 py-2 text-xs font-medium transition-colors ${
-                    viewMode === "table"
-                      ? "bg-sky-600 text-white"
-                      : "text-gray-600 hover:bg-gray-50"
-                  }`}
-                >
-                  ☰ Tabell
-                </button>
-                <button
-                  onClick={() => setViewMode("cards")}
-                  className={`px-3 py-2 text-xs font-medium transition-colors ${
-                    viewMode === "cards"
-                      ? "bg-sky-600 text-white"
-                      : "text-gray-600 hover:bg-gray-50"
-                  }`}
-                >
-                  ⊞ Kort
-                </button>
-              </div>
-            </div>
-
             {/* Summary chips */}
             <div className="flex flex-wrap gap-2">
               <span className="text-xs bg-white border border-gray-200 px-3 py-1 rounded-full text-gray-600">

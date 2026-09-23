@@ -1,6 +1,7 @@
 "use client";
 
 import type { TeamData } from "@/lib/types";
+import { TEAM_COLOR_MAP } from "@/lib/teamColors";
 
 interface Props {
   teams: TeamData[];
@@ -32,7 +33,7 @@ export default function MatchFilters({
         <option value="all">Alle lag</option>
         {teams.map((t) => (
           <option key={t.id} value={String(t.id)}>
-            {t.shortName || t.name}
+            {TEAM_COLOR_MAP[t.id]?.displayName || t.shortName || t.name}
           </option>
         ))}
       </select>

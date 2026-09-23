@@ -84,7 +84,7 @@ export default function MatchCard({ match }: Props) {
           </p>
         </div>
         <span className={`text-xs px-2 py-0.5 rounded-full whitespace-nowrap shrink-0 border font-semibold ${teamColors.bgClass} ${teamColors.textClass} border-opacity-20`}>
-          {match.teamName}
+          {teamColors.displayName}
         </span>
       </div>
 

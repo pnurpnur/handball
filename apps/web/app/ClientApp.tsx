@@ -279,7 +279,7 @@ export default function ClientApp({ initialMatches, teams, seasons }: Props) {
         {tab === "kamper" ? (
           <div className="space-y-4">
             {/* Filters + view toggle */}
-            <div className="sticky top-[120px] z-10 bg-gray-50 -mx-4 px-4 py-3 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3">
+            <div className="sticky top-[117px] z-10 bg-gray-50 -mx-4 px-4 py-3 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3">
               <MatchFilters
                 teams={seasonTeams}
                 selectedTeam={teamFilter}

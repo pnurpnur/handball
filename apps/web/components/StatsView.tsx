@@ -371,7 +371,7 @@ export default function StatsView({ stats, matches }: Props) {
         if (!teamStats) return null;
         const teamMatches = playedMatches.filter((m) => m.teamId === team.id);
         const isExpanded = expandedTeams.has(team.id);
-        const displayName = team.shortName || team.name;
+        const displayName = TEAM_COLOR_MAP[team.id]?.displayName || team.shortName || team.name;
 
         // Get team background color - muted/light version using team ID
         let teamBgClass = "bg-white";

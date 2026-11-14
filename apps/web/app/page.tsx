@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import ClientApp from "./ClientApp";
 import type { MatchData, TeamData, SeasonData } from "@/lib/types";
 
-export const revalidate = 300; // Revalidate every 5 minutes (ISR)
+export const dynamic = "force-dynamic"; // always fresh so saved minutes show after refresh
 
 const TEAM_ORDER = [698373, 771912, 682520, 709787, 928241, 206064];
 

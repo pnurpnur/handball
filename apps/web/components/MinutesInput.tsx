@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface Props {
   matchId: string;
@@ -22,6 +22,7 @@ export default function MinutesInput({ matchId, initialMinutes, matchLength, onS
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ minutesPlayed: value }),
+        keepalive: true,
       });
       if (!res.ok) throw new Error("save failed");
       setSaveState("idle");
@@ -31,14 +32,32 @@ export default function MinutesInput({ matchId, initialMinutes, matchLength, onS
     }
   }
 
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastSaved = useRef<number | null>(initialMinutes);
+
+  // Save shortly after typing stops (don't rely on blur, which mobile
+  // browsers often skip before a refresh/navigation).
+  function scheduleSave(value: number | null) {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
+      timer.current = null;
+      if (value !== lastSaved.current) {
+        lastSaved.current = value;
+        save(value);
+      }
+    }, 500);
+  }
+
+  useEffect(() => () => {
+    if (timer.current) clearTimeout(timer.current);
+  }, []);
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const raw = e.target.value;
-    if (raw === "") {
-      setMinutes(null);
-      return;
-    }
-    const parsed = parseInt(raw, 10);
-    setMinutes(Number.isNaN(parsed) ? null : Math.max(0, parsed));
+    const value =
+      raw === "" ? null : Number.isNaN(parseInt(raw, 10)) ? null : Math.max(0, parseInt(raw, 10));
+    setMinutes(value);
+    scheduleSave(value);
   }
 
   const stop = (e: React.SyntheticEvent) => {
@@ -58,7 +77,14 @@ export default function MinutesInput({ matchId, initialMinutes, matchLength, onS
         inputMode="numeric"
         value={minutes ?? ""}
         onChange={handleChange}
-        onBlur={() => save(minutes)}
+        onBlur={() => {
+          if (timer.current) clearTimeout(timer.current);
+          timer.current = null;
+          if (minutes !== lastSaved.current) {
+            lastSaved.current = minutes;
+            save(minutes);
+          }
+        }}
         onClick={stop}
         placeholder="min"
         aria-label="Minutter spilt"
